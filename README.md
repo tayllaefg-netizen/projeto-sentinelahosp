@@ -279,15 +279,15 @@ O sistema foi arquitetado com uma **Camada de Acesso a Dados (Repository Pattern
 ### Opção 2: PostgreSQL (Ambientes de Produção)
 - **Como configurar:**
   1. Instale o PostgreSQL (ou utilize um serviço em nuvem como Supabase, Neon ou AWS RDS).
-  2. Crie uma base de dados: `CREATE DATABASE hospital_amandinha;`
+  2. Crie uma base de dados: `CREATE DATABASE hospital_tayla;`
   3. Execute o script SQL completo fornecido no arquivo [`database.sql`](database.sql):
      ```bash
-     psql -U postgres -d hospital_amandinha -f database.sql
+     psql -U postgres -d hospital_tayla -f database.sql
      ```
   4. No arquivo `.env`, altere o cliente e informe a URL de conexão:
      ```env
      DB_CLIENT=postgres
-     DATABASE_URL=postgres://usuario:senha@localhost:5432/hospital_amandinha
+     DATABASE_URL=postgres://usuario:senha@localhost:5432/hospital_tayla
      ```
   5. Instale o driver do PostgreSQL:
      ```bash
