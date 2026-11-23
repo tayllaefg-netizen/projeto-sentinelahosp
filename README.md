@@ -311,8 +311,8 @@ O projeto já conta com [`vercel.json`](vercel.json) e [`api/index.js`](api/inde
 # Instala o PM2 globalmente
 npm install -g pm2
 
-# Inicia o servidor Amandinha em background com reinício automático
-pm2 start backend/server.js --name "amandinha-hospital"
+# Inicia o servidor Tayla em background com reinício automático
+pm2 start backend/server.js --name "tayla-hospital"
 
 # Configura inicialização no boot do sistema operacional
 pm2 startup
