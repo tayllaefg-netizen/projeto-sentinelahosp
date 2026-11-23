@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triagem Manchester — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .vital-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vital-box label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .vital-box input {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--navy);
+      height: 38px;
+      padding: 6px 10px;
+    }
+
+    .manchester-picker {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .manchester-opt {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: #FFFFFF;
+    }
+
+    .manchester-opt:hover {
+      transform: translateY(-2px);
+    }
+
+    .manchester-opt.selected {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(38, 54, 74, 0.2);
+    }
+
+    .ai-assistant-card {
+      background: linear-gradient(135deg, #FFF0F6 0%, #FFFFFF 100%);
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-top: 14px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Triagem & Classificação de Risco (Manchester)</h2>
+            <p>Aferição de sinais vitais, priorização clínica e suporte inteligente à enfermagem</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" onclick="carregarDadosTriagem()">🔄 Atualizar Filas</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <div style="display: grid; grid-template-columns: 360px 1fr; gap: 24px;">
+          <!-- Coluna 1: Fila de Pacientes Aguardando Triagem -->
+          <div>
+            <div class="card" style="height: calc(100vh - 170px); display: flex; flex-direction: column;">
+              <div class="card-header">
+                <div class="card-title">
+                  <span>⏳</span>
+                  <span>Aguardando Triagem</span>
+                </div>
+                <span id="badgeFilaTriagem" class="badge badge-warning">0</span>
+              </div>
+
+              <div id="listaAguardandoTriagem" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <p style="text-align: center; color: var(--text-muted); padding: 20px;">Carregando fila...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna 2: Formulário de Triagem do Paciente Selecionado -->
+          <div>
+            <div class="card" id="cardFormularioTriagem">
+              <div class="card-header">
+                <div class="card-title">
+                  <span>🩺</span>
+                  <span id="tituloPacienteSelecionado">Selecione um paciente na fila para iniciar</span>
+                </div>
+                <div id="acoesPaciente" style="display: none;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="chamarSelecionadoNaTv()">📢 Chamar na TV</button>
+                </div>
+              </div>
+
+              <form id="formTriagem" onsubmit="salvarTriagem(event)">
+                <input type="hidden" id="triagemPacienteId">
+                <input type="hidden" id="triagemNome">
+                <input type="hidden" id="triagemCpf">
+                <input type="hidden" id="triagemSenha">
+                <input type="hidden" id="triagemRiscoSelecionado" value="verde">
+                <input type="hidden" id="iaRecomendacaoJson" value="">
+
+                <!-- Dados do Paciente -->
+                <div id="dadosResumoPaciente" style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: none;">
+                  <p><strong>Paciente:</strong> <span id="lblNome">--</span> | <strong>CPF:</strong> <span id="lblCpf">--</span> | <strong>Idade:</strong> <span id="lblIdade">--</span></p>
+                  <p style="color: var(--danger); font-size: 13px; margin-top: 4px;"><strong>Alergias Prévias:</strong> <span id="lblAlergias">--</span></p>
+                </div>
+
+                <!-- Sinais Vitais -->
+                <h4 style="font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 10px;">📊 Sinais Vitais do Paciente</h4>
+                <div class="vitals-grid">
+                  <div class="vital-box">
+                    <label>P.A. (mmHg)</label>
+                    <input type="text" id="vitPA" placeholder="120/80" value="120/80" oninput="calcularRiscoAutomatico()">
+                  </div>
+                  <div class="vital-box">
+                    <label>F.C. (bpm)</label>
+                    <input type="number" id="vitFC" placeholder="80" value="78" oninput="calcularRiscoAutomatico()">
+                  </div>
+                  <div class="vital-box">
+                    <label>F.R. (rpm)</label>
+                    <input type="number" id="vitFR" placeholder="18" value="18" oninput="calcularRiscoAutomatico()">
+                  </div>
+                  <div class="vital-box">
+                    <label>Temp (°C)</label>
+                    <input type="number" step="0.1" id="vitTemp" placeholder="36.5" value="36.8" oninput="calcularRiscoAutomatico()">
+                  </div>
+                  <div class="vital-box">
+                    <label>SpO2 (%)</label>
+                    <input type="number" id="vitSat" placeholder="98" value="98" oninput="calcularRiscoAutomatico()">
+                  </div>
+                  <div class="vital-box">
+                    <label>Glicemia (mg/dL)</label>
+                    <input type="text" id="vitGlicemia" placeholder="95">
+                  </div>
+                  <div class="vital-box">
+                    <label>Dor (EVA 0-10)</label>
+                    <input type="number" min="0" max="10" id="vitDor" placeholder="0" value="2" oninput="calcularRiscoAutomatico()">
+                  </div>
+                </div>
+
+                <!-- Queixa e Sintomas -->
+                <div class="form-grid">
+                  <div class="form-group col-span-2">
+                    <label for="triagemQueixa">Queixa Principal / Relato do Paciente <span class="required">*</span></label>
+                    <textarea id="triagemQueixa" placeholder="Descreva o que o paciente está sentindo, tempo de evolução, sintomas associados..." required></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="triagemSintoma">Fluxograma / Sintoma Guia</label>
+                    <select id="triagemSintoma" onchange="calcularRiscoAutomatico()">
+                      <option value="geral">Geral / Sintomas Leves</option>
+                      <option value="febre">Febre / Síndrome Gripal</option>
+                      <option value="dor_toracica">Dor no Peito / Torácica</option>
+                      <option value="dispneia">Falta de Ar / Desconforto Respiratório</option>
+                      <option value="cefaleia">Cefaleia / Dor de Cabeça</option>
+                      <option value="dor_abdominal">Dor Abdominal / Vômito</option>
+                      <option value="trauma">Trauma / Queda / Ferimento</option>
+                      <option value="convulsao">Convulsão / Desmaio</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="triagemComorbidades">Comorbidades / Antecedentes</label>
+                    <input type="text" id="triagemComorbidades" placeholder="Ex: HAS, Diabetes, Asma, Cardiopatia">
+                  </div>
+
+                  <div class="form-group col-span-2">
+                    <label for="triagemObservacao">Observações da Enfermagem</label>
+                    <input type="text" id="triagemObservacao" placeholder="Ex: Paciente lúcido, orientado em tempo e espaço, deambulando">
+                  </div>
+                </div>
+
+                <!-- Seletor e Classificação Manchester -->
+                <div style="margin-top: 10px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label>Classificação de Risco (Protocolo de Manchester)</label>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="consultarAssistenteIA()">🤖 Consultar Suporte IA</button>
+                  </div>
+
+                  <div class="manchester-picker">
+                    <div class="manchester-opt badge-vermelho" id="optVermelho" onclick="selecionarRisco('vermelho')">
+                      <strong>🔴 VERMELHO</strong>
+                      <div style="font-size: 11px;">Emergência (0 min)</div>
+                    </div>
+                    <div class="manchester-opt badge-laranja" id="optLaranja" onclick="selecionarRisco('laranja')">
+                      <strong>🟠 LARANJA</strong>
+                      <div style="font-size: 11px;">Muito Urgente (10 min)</div>
+                    </div>
+                    <div class="manchester-opt badge-amarelo" id="optAmarelo" onclick="selecionarRisco('amarelo')">
+                      <strong>🟡 AMARELO</strong>
+                      <div style="font-size: 11px;">Urgente (50 min)</div>
+                    </div>
+                    <div class="manchester-opt badge-verde selected" id="optVerde" onclick="selecionarRisco('verde')">
+                      <strong>🟢 VERDE</strong>
+                      <div style="font-size: 11px;">Pouco Urgente (120 min)</div>
+                    </div>
+                    <div class="manchester-opt badge-azul" id="optAzul" onclick="selecionarRisco('azul')">
+                      <strong>🔵 AZUL</strong>
+                      <div style="font-size: 11px;">Não Urgente (240 min)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Caixa do Assistente de IA -->
+                <div class="ai-assistant-card" id="cardIA">
+                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 20px;">🤖</span>
+                    <strong style="color: var(--primary-dark); font-size: 14px;">Recomendação do Assistente de Triagem Amandinha</strong>
+                  </div>
+                  <p id="iaJustificativa" style="font-size: 13px; color: var(--navy); margin-bottom: 6px;"></p>
+                  <div id="iaAlertas" style="font-size: 12px; color: var(--danger); margin-bottom: 8px;"></div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnAceitarIA" onclick="aceitarSugestaoIA()">Aplicar Recomendação da IA</button>
+                    <span style="font-size: 11px; color: var(--text-muted);">Requer validação pelo profissional responsável.</span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                  <button type="submit" class="btn btn-primary btn-lg" id="btnSalvarTriagem">
+                    💾 Concluir Triagem & Encaminhar ao Médico
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth(['triagem', 'enfermeiro', 'admin']);
+    initAppLayout('triagem');
+
+    let pacientesAguardando = [];
+    let pacienteAtual = null;
+
+    async function carregarDadosTriagem() {
+      try {
+        const pacientes = await apiFetch('/api/pacientes?status=triagem');
+        pacientesAguardando = pacientes;
+        renderizarFilaTriagem();
+      } catch (err) {
+        showToast('Erro ao carregar fila de triagem.', 'danger');
+      }
+    }
+
+    function renderizarFilaTriagem() {
+      const container = document.getElementById('listaAguardandoTriagem');
+      document.getElementById('badgeFilaTriagem').textContent = pacientesAguardando.length;
+
+      if (!pacientesAguardando || pacientesAguardando.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 30px;">
+            🎉 Não há pacientes aguardando triagem no momento.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = pacientesAguardando.map(p => `
+        <div class="stat-card" style="padding: 14px; cursor: pointer; border-left: 4px solid var(--primary); ${pacienteAtual?.id === p.id ? 'border-color: var(--navy); background: var(--primary-subtle);' : ''}" onclick="selecionarPacienteParaTriagem('${p.id}')">
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="color: var(--primary-dark);">${escapeHtml(p.senhaAtendimento || 'A-01')}</strong>
+              <small style="color: var(--text-muted);">${formatDate(p.createdAt)}</small>
+            </div>
+            <div style="font-weight: 800; color: var(--navy); margin-top: 4px;">${escapeHtml(p.nome)}</div>
+            <small style="color: var(--text-muted);">${escapeHtml(p.tipo || 'Particular')}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selecionarPacienteParaTriagem(id) {
+      const p = pacientesAguardando.find(x => String(x.id) === String(id));
+      if (!p) return;
+
+      pacienteAtual = p;
+      renderizarFilaTriagem();
+
+      document.getElementById('tituloPacienteSelecionado').textContent = `Triagem: ${p.nome} (${p.senhaAtendimento || 'A-01'})`;
+      document.getElementById('acoesPaciente').style.display = 'block';
+      document.getElementById('dadosResumoPaciente').style.display = 'block';
+
+      document.getElementById('lblNome').textContent = p.nome;
+      document.getElementById('lblCpf').textContent = p.cpf || '--';
+      document.getElementById('lblIdade').textContent = p.dataNascimento ? `${p.dataNascimento}` : 'Não informada';
+      document.getElementById('lblAlergias').textContent = p.alergias || 'Nenhuma';
+
+      document.getElementById('triagemPacienteId').value = p.id;
+      document.getElementById('triagemNome').value = p.nome;
+      document.getElementById('triagemCpf').value = p.cpf || '';
+      document.getElementById('triagemSenha').value = p.senhaAtendimento || '';
+
+      document.getElementById('cardIA').style.display = 'none';
+      calcularRiscoAutomatico();
+    }
+
+    function selecionarRisco(risco) {
+      document.getElementById('triagemRiscoSelecionado').value = risco;
+      const opts = ['vermelho', 'laranja', 'amarelo', 'verde', 'azul'];
+      opts.forEach(r => {
+        const el = document.getElementById(`opt${r.charAt(0).toUpperCase() + r.slice(1)}`);
+        if (el) el.classList.toggle('selected', r === risco);
+      });
+    }
+
+    function calcularRiscoAutomatico() {
+      const temp = Number(document.getElementById('vitTemp').value) || 36.5;
+      const sat = Number(document.getElementById('vitSat').value) || 98;
+      const dor = Number(document.getElementById('vitDor').value) || 0;
+      const sintoma = document.getElementById('triagemSintoma').value;
+
+      let risco = 'verde';
+
+      if (sat < 90 || sintoma === 'dor_toracica' && dor >= 8) {
+        risco = 'vermelho';
+      } else if (temp >= 39.0 || (sat >= 90 && sat <= 93) || sintoma === 'dispneia' || dor >= 8 || sintoma === 'convulsao') {
+        risco = 'laranja';
+      } else if (temp >= 38.0 || dor >= 5 || sintoma === 'dor_abdominal') {
+        risco = 'amarelo';
+      } else if (sintoma === 'febre') {
+        risco = 'amarelo';
+      }
+
+      selecionarRisco(risco);
+    }
+
+    async function consultarAssistenteIA() {
+      const payload = {
+        temperatura: document.getElementById('vitTemp').value,
+        saturacaoO2: document.getElementById('vitSat').value,
+        frequenciaCardiaca: document.getElementById('vitFC').value,
+        frequenciaRespiratoria: document.getElementById('vitFR').value,
+        pressaoArterial: document.getElementById('vitPA').value,
+        escalaDor: document.getElementById('vitDor').value,
+        sintoma: document.getElementById('triagemSintoma').value,
+        queixaPrincipal: document.getElementById('triagemQueixa').value,
+        alergia: document.getElementById('lblAlergias').textContent
+      };
+
+      try {
+        const res = await apiFetch('/api/triagem/analise-ia', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.sucesso && res.recomendacao) {
+          const r = res.recomendacao;
+          document.getElementById('cardIA').style.display = 'block';
+          document.getElementById('iaJustificativa').innerHTML = `
+            <strong>Sugestão:</strong> <span class="badge badge-${r.sugestaoRisco}">${r.sugestaoRisco.toUpperCase()}</span> (${r.tempoMaxMinutos} min)<br>
+            ${escapeHtml(r.justificativaClinica)}<br>
+            <em>Conduta Sugerida: ${escapeHtml(r.condutaSugerida)}</em>
+          `;
+
+          if (r.alertas && r.alertas.length > 0) {
+            document.getElementById('iaAlertas').innerHTML = `⚠️ <b>Sinais de Alarme:</b> ${r.alertas.map(escapeHtml).join('; ')}`;
+          } else {
+            document.getElementById('iaAlertas').innerHTML = '';
+          }
+
+          document.getElementById('iaRecomendacaoJson').value = JSON.stringify(r);
+          showToast('Análise de IA concluída.', 'info');
+        }
+      } catch (err) {
+        showToast('Falha ao acionar assistente de triagem.', 'danger');
+      }
+    }
+
+    function aceitarSugestaoIA() {
+      try {
+        const raw = document.getElementById('iaRecomendacaoJson').value;
+        if (raw) {
+          const rec = JSON.parse(raw);
+          selecionarRisco(rec.sugestaoRisco);
+          showToast(`Recomendação ${rec.sugestaoRisco.toUpperCase()} validada pela enfermagem.`, 'success');
+        }
+      } catch (e) {}
+    }
+
+    async function chamarSelecionadoNaTv() {
+      if (!pacienteAtual) return;
+      try {
+        await apiFetch('/api/tv/chamar', {
+          method: 'POST',
+          body: JSON.stringify({
+            localTipo: 'SALA DE TRIAGEM',
+            localNumero: '01',
+            paciente: pacienteAtual.nome,
+            senha: pacienteAtual.senhaAtendimento || 'T-01'
+          })
+        });
+        showToast(`Paciente ${pacienteAtual.nome} chamado para a Sala de Triagem!`, 'success');
+        playHospitalChime();
+      } catch (err) {
+        showToast('Erro ao transmitir chamada para a TV.', 'danger');
+      }
+    }
+
+    async function salvarTriagem(e) {
+      e.preventDefault();
+      const pacienteId = document.getElementById('triagemPacienteId').value;
+      if (!pacienteId && !document.getElementById('triagemNome').value) {
+        showToast('Selecione um paciente na fila para realizar a triagem.', 'warning');
+        return;
+      }
+
+      const payload = {
+        pacienteId: pacienteId,
+        nome: document.getElementById('triagemNome').value,
+        cpf: document.getElementById('triagemCpf').value,
+        pressaoArterial: document.getElementById('vitPA').value,
+        frequenciaCardiaca: Number(document.getElementById('vitFC').value),
+        frequenciaRespiratoria: Number(document.getElementById('vitFR').value),
+        temperatura: Number(document.getElementById('vitTemp').value),
+        saturacaoO2: Number(document.getElementById('vitSat').value),
+        glicemia: document.getElementById('vitGlicemia').value,
+        escalaDor: Number(document.getElementById('vitDor').value),
+        sintoma: document.getElementById('triagemSintoma').value,
+        queixaPrincipal: document.getElementById('triagemQueixa').value.trim(),
+        comorbidades: document.getElementById('triagemComorbidades').value.trim(),
+        observacao: document.getElementById('triagemObservacao').value.trim(),
+        alergia: document.getElementById('lblAlergias').textContent,
+        risco: document.getElementById('triagemRiscoSelecionado').value,
+        iaRecomendacao: document.getElementById('iaRecomendacaoJson').value || null
+      };
+
+      try {
+        await apiFetch('/api/triagem', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        showToast(`Triagem de ${payload.nome} concluída com risco ${payload.risco.toUpperCase()}!`, 'success');
+
+        // Limpa formulário
+        pacienteAtual = null;
+        document.getElementById('formTriagem').reset();
+        document.getElementById('tituloPacienteSelecionado').textContent = 'Selecione um paciente na fila para iniciar';
+        document.getElementById('dadosResumoPaciente').style.display = 'none';
+        document.getElementById('acoesPaciente').style.display = 'none';
+        document.getElementById('cardIA').style.display = 'none';
+
+        carregarDadosTriagem();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    carregarDadosTriagem();
+    setInterval(carregarDadosTriagem, 12000);
+  </script>
+</body>
+</html>

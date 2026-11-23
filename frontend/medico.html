@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultório Médico — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .fila-medica-item {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .fila-medica-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .fila-medica-item.selected {
+      border-color: var(--navy);
+      background: var(--primary-subtle);
+    }
+
+    .fila-medica-item.borda-vermelho { border-left: 5px solid var(--manchester-vermelho); }
+    .fila-medica-item.borda-laranja  { border-left: 5px solid var(--manchester-laranja); }
+    .fila-medica-item.borda-amarelo  { border-left: 5px solid var(--manchester-amarelo); }
+    .fila-medica-item.borda-verde    { border-left: 5px solid var(--manchester-verde); }
+    .fila-medica-item.borda-azul     { border-left: 5px solid var(--manchester-azul); }
+
+    .vitals-summary-badge {
+      display: inline-flex;
+      gap: 8px;
+      background: #F1F5F9;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Consultório Médico & Prontuário</h2>
+            <p>Atendimento clínico, prescrição eletrônica, exames e decisão médica</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 13px; font-weight: 700;">Consultório:</label>
+            <select id="selConsultorio" style="height: 36px; padding: 4px 8px; width: 140px;">
+              <option value="Consultório 01">Consultório 01</option>
+              <option value="Consultório 02">Consultório 02</option>
+              <option value="Consultório 03">Consultório 03</option>
+              <option value="Sala de Emergência">Emergência</option>
+            </select>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="carregarFilaMedica()">🔄 Atualizar</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <div style="display: grid; grid-template-columns: 370px 1fr; gap: 24px;">
+          <!-- Coluna 1: Fila Prioritária Manchester -->
+          <div>
+            <div class="card" style="height: calc(100vh - 170px); display: flex; flex-direction: column;">
+              <div class="card-header">
+                <div class="card-title">
+                  <span>⏱️</span>
+                  <span>Fila Prioritária (Manchester)</span>
+                </div>
+                <span id="badgeFilaMedica" class="badge badge-manchester badge-vermelho">0</span>
+              </div>
+
+              <div id="containerFilaMedica" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <p style="text-align: center; color: var(--text-muted); padding: 30px;">Carregando fila médica...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna 2: Atendimento Clínico e Conduta -->
+          <div>
+            <div class="card" id="cardAtendimentoClinico">
+              <div class="card-header">
+                <div class="card-title">
+                  <span>👨‍⚕️</span>
+                  <span id="tituloAtendimentoMedico">Selecione um paciente na fila para atender</span>
+                </div>
+                <div id="acoesMedico" style="display: none; display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="chamarPacienteNoConsultorio()">📢 Chamar na TV</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="abrirHistoricoPacienteAtual()">📜 Histórico</button>
+                </div>
+              </div>
+
+              <!-- Painel de Dados Vitais da Triagem -->
+              <div id="painelDadosTriagem" style="display: none; background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                  <div>
+                    <h3 id="pacNomeTop" style="font-size: 17px; font-weight: 800; color: var(--navy);">--</h3>
+                    <div style="font-size: 12px; color: var(--text-muted);" id="pacInfoTop">--</div>
+                  </div>
+                  <span id="pacManchesterBadge" class="badge badge-manchester badge-vermelho">--</span>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                  <span class="vitals-summary-badge" id="vPA">PA: --</span>
+                  <span class="vitals-summary-badge" id="vFC">FC: -- bpm</span>
+                  <span class="vitals-summary-badge" id="vTemp">Temp: -- °C</span>
+                  <span class="vitals-summary-badge" id="vSat">SpO2: -- %</span>
+                  <span class="vitals-summary-badge" id="vDor">Dor: --/10</span>
+                </div>
+
+                <div style="font-size: 13px; color: var(--text-main); margin-bottom: 4px;">
+                  <strong>Queixa Principal na Triagem:</strong> <span id="lblQueixaTriagem">--</span>
+                </div>
+                <div style="font-size: 13px; color: var(--danger); font-weight: 700;">
+                  ⚠️ ALERGIAS: <span id="lblAlergiasAtendimento">Nenhuma</span>
+                </div>
+              </div>
+
+              <!-- Formulário de Prontuário e Conduta -->
+              <form id="formConsulta" onsubmit="salvarConsulta(event)">
+                <input type="hidden" id="consultaPacienteId">
+                <input type="hidden" id="consultaPacienteNome">
+                <input type="hidden" id="consultaTriagemId">
+
+                <div class="form-grid">
+                  <div class="form-group col-span-2">
+                    <label for="conAnamnese">Anamnese & Evolução Médica <span class="required">*</span></label>
+                    <textarea id="conAnamnese" placeholder="Relato clínico detalhado, exame físico (ACV, AR, Abdome, Neurológico), tempo de evolução..." required></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="conCid10">Hipótese Diagnóstica / CID-10 <span class="required">*</span></label>
+                    <input type="text" id="conCid10" placeholder="Ex: J06.9 - Infecção Aguda das Vias Aéreas" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="conDecisao">Decisão Clínica</label>
+                    <select id="conDecisao" onchange="alternarDecisaoClinica(this.value)">
+                      <option value="alta">Alta com Orientações e Prescrição Domiciliar</option>
+                      <option value="internacao">Encaminhar para Internação Hospitalar</option>
+                      <option value="observacao">Manter em Observação no Pronto Atendimento</option>
+                    </select>
+                  </div>
+
+                  <!-- Prescrição Eletrônica Integrada -->
+                  <div class="form-group col-span-2">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label>💊 Prescrição Médica (Integrada à Farmácia Hospitalar)</label>
+                      <span style="font-size: 11px; color: var(--text-muted);">Estoque verificado automaticamente</span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                      <select id="selMedicamentoCatalogo" style="flex: 2;">
+                        <option value="">Carregando medicamentos do estoque...</option>
+                      </select>
+                      <input type="text" id="prescDose" placeholder="Dose (Ex: 1 ampola IV agora ou 1 cp 8/8h)" style="flex: 2;">
+                      <button type="button" class="btn btn-outline btn-sm" onclick="adicionarMedicamentoPrescricao()">➕ Inserir</button>
+                    </div>
+
+                    <textarea id="conPrescricaoFinal" placeholder="Itens prescritos aparecerão aqui..." style="min-height: 80px;"></textarea>
+                  </div>
+
+                  <div class="form-group col-span-2">
+                    <label for="conConduta">Conduta Geral & Orientações ao Paciente</label>
+                    <input type="text" id="conConduta" placeholder="Ex: Repouso domiciliar, hidratação abundante, retorno se dispneia ou febre persistente">
+                  </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                  <button type="submit" class="btn btn-primary btn-lg" id="btnSalvarConsulta">
+                    ✅ Concluir Atendimento & Registrar Prontuário
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth(['medico', 'admin']);
+    initAppLayout('medico');
+
+    let filaMedica = [];
+    let triagemSelecionada = null;
+
+    async function carregarFilaMedica() {
+      try {
+        const triagens = await apiFetch('/api/triagens?status=aguardando_medico');
+        filaMedica = triagens;
+        renderizarFilaMedica();
+        carregarMedicamentosEstoque();
+      } catch (err) {
+        showToast('Erro ao listar fila médica.', 'danger');
+      }
+    }
+
+    function renderizarFilaMedica() {
+      const container = document.getElementById('containerFilaMedica');
+      document.getElementById('badgeFilaMedica').textContent = filaMedica.length;
+
+      if (!filaMedica || filaMedica.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 30px;">
+            🎉 Não há pacientes aguardando atendimento médico no momento.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filaMedica.map(t => `
+        <div class="fila-medica-item borda-${t.risco} ${triagemSelecionada?.id === t.id ? 'selected' : ''}" onclick="selecionarPacienteParaConsulta('${t.id}')">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="badge badge-manchester badge-${t.risco}">${t.risco.toUpperCase()}</span>
+            <small style="color: var(--text-muted);">${formatDate(t.createdAt)}</small>
+          </div>
+          <div style="font-weight: 800; font-size: 15px; color: var(--navy); margin-top: 4px;">${escapeHtml(t.nome)}</div>
+          <div style="font-size: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <b>Queixa:</b> ${escapeHtml(t.queixaPrincipal || t.sintoma)}
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            <span>PA: ${t.pressaoArterial}</span>
+            <span>Temp: ${t.temperatura}°C</span>
+            <span>SpO2: ${t.saturacaoO2}%</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selecionarPacienteParaConsulta(id) {
+      const t = filaMedica.find(x => String(x.id) === String(id));
+      if (!t) return;
+
+      triagemSelecionada = t;
+      renderizarFilaMedica();
+
+      document.getElementById('tituloAtendimentoMedico').textContent = `Atendimento: ${t.nome}`;
+      document.getElementById('acoesMedico').style.display = 'flex';
+      document.getElementById('painelDadosTriagem').style.display = 'block';
+
+      document.getElementById('pacNomeTop').textContent = t.nome;
+      document.getElementById('pacInfoTop').textContent = `CPF: ${t.cpf || 'Não informado'} | Triado por: ${t.responsavel || 'Enfermagem'}`;
+      document.getElementById('pacManchesterBadge').className = `badge badge-manchester badge-${t.risco}`;
+      document.getElementById('pacManchesterBadge').textContent = t.risco.toUpperCase();
+
+      document.getElementById('vPA').textContent = `PA: ${t.pressaoArterial}`;
+      document.getElementById('vFC').textContent = `FC: ${t.frequenciaCardiaca} bpm`;
+      document.getElementById('vTemp').textContent = `Temp: ${t.temperatura}°C`;
+      document.getElementById('vSat').textContent = `SpO2: ${t.saturacaoO2}%`;
+      document.getElementById('vDor').textContent = `Dor: ${t.escalaDor}/10`;
+
+      document.getElementById('lblQueixaTriagem').textContent = t.queixaPrincipal || t.sintoma;
+      document.getElementById('lblAlergiasAtendimento').textContent = t.alergia || 'Nenhuma';
+
+      document.getElementById('consultaPacienteId').value = t.pacienteId || '';
+      document.getElementById('consultaPacienteNome').value = t.nome;
+      document.getElementById('consultaTriagemId').value = t.id;
+    }
+
+    async function carregarMedicamentosEstoque() {
+      try {
+        const res = await apiFetch('/api/farmacia/medicamentos');
+        const sel = document.getElementById('selMedicamentoCatalogo');
+        if (res.medicamentos && res.medicamentos.length > 0) {
+          sel.innerHTML = '<option value="">-- Selecione uma medicação do estoque --</option>' +
+            res.medicamentos.map(m => `
+              <option value="${escapeHtml(m.nome)} (${escapeHtml(m.apresentacao)})" data-saldo="${m.quantidade}">
+                ${escapeHtml(m.nome)} - Saldo: ${m.quantidade} ${escapeHtml(m.unidade || 'un')}
+              </option>
+            `).join('');
+        }
+      } catch (err) {}
+    }
+
+    function adicionarMedicamentoPrescricao() {
+      const sel = document.getElementById('selMedicamentoCatalogo');
+      const dose = document.getElementById('prescDose').value.trim();
+      const med = sel.value;
+
+      if (!med) {
+        showToast('Selecione uma medicação.', 'warning');
+        return;
+      }
+
+      const txt = document.getElementById('conPrescricaoFinal');
+      const linha = `• ${med} - ${dose || 'Uso conforme orientação clínica'}\n`;
+      txt.value += linha;
+      document.getElementById('prescDose').value = '';
+      showToast('Medicação adicionada à prescrição.', 'info', 1500);
+    }
+
+    async function chamarPacienteNoConsultorio() {
+      if (!triagemSelecionada) return;
+      const consultorio = document.getElementById('selConsultorio').value;
+      try {
+        await apiFetch('/api/tv/chamar', {
+          method: 'POST',
+          body: JSON.stringify({
+            localTipo: consultorio.toUpperCase(),
+            localNumero: consultorio.replace(/\D/g, '') || '01',
+            paciente: triagemSelecionada.nome,
+            senha: 'MÉDICO'
+          })
+        });
+        showToast(`Paciente ${triagemSelecionada.nome} chamado na TV para o ${consultorio}!`, 'success');
+        playHospitalChime();
+      } catch (err) {
+        showToast('Erro ao transmitir chamada para a TV.', 'danger');
+      }
+    }
+
+    async function salvarConsulta(e) {
+      e.preventDefault();
+      if (!triagemSelecionada) {
+        showToast('Selecione um paciente na fila para realizar o atendimento.', 'warning');
+        return;
+      }
+
+      const decisao = document.getElementById('conDecisao').value;
+      const payload = {
+        pacienteId: document.getElementById('consultaPacienteId').value || triagemSelecionada.pacienteId,
+        paciente: document.getElementById('consultaPacienteNome').value || triagemSelecionada.nome,
+        triagemId: triagemSelecionada.id,
+        anamnese: document.getElementById('conAnamnese').value.trim(),
+        diagnostico: document.getElementById('conCid10').value.trim(),
+        conduta: document.getElementById('conConduta').value.trim(),
+        medicacao: document.getElementById('conPrescricaoFinal').value.trim(),
+        decisaoClinica: decisao
+      };
+
+      try {
+        await apiFetch('/api/consultas', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (decisao === 'internacao') {
+          showToast('Atendimento registrado! Encaminhando para Gestão de Leitos...', 'info');
+          // Guarda paciente para internação rápida
+          localStorage.setItem('pacienteInternar', JSON.stringify({
+            id: payload.pacienteId,
+            nome: payload.paciente,
+            diagnostico: payload.diagnostico
+          }));
+          setTimeout(() => location.href = 'internacao.html', 1200);
+        } else {
+          showToast('Atendimento médico concluído e prontuário registrado!', 'success');
+          // Limpa formulário
+          triagemSelecionada = null;
+          document.getElementById('formConsulta').reset();
+          document.getElementById('tituloAtendimentoMedico').textContent = 'Selecione um paciente na fila para atender';
+          document.getElementById('acoesMedico').style.display = 'none';
+          document.getElementById('painelDadosTriagem').style.display = 'none';
+
+          carregarFilaMedica();
+        }
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function alternarDecisaoClinica(valor) {
+      const btn = document.getElementById('btnSalvarConsulta');
+      if (valor === 'internacao') {
+        btn.innerHTML = '🛏️ Concluir & Prosseguir para Internação';
+      } else {
+        btn.innerHTML = '✅ Concluir Atendimento & Registrar Prontuário';
+      }
+    }
+
+    carregarFilaMedica();
+    setInterval(carregarFilaMedica, 10000);
+  </script>
+</body>
+</html>

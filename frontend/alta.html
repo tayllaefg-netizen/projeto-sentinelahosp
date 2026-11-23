@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alta Hospitalar — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .document-paper {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 36px 40px;
+      max-width: 860px;
+      margin: 0 auto 30px;
+      position: relative;
+    }
+
+    .doc-hospital-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border-pink);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .doc-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .doc-brand-icon {
+      font-size: 32px;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .doc-brand-text h2 {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--navy);
+    }
+
+    .doc-brand-text span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .doc-stamp {
+      border: 2px solid var(--primary);
+      color: var(--primary-dark);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-signature-line {
+      margin-top: 50px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .sig-box {
+      width: 280px;
+      border-top: 1.5px solid var(--navy);
+      text-align: center;
+      padding-top: 6px;
+      font-size: 13px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container" class="no-print"></div>
+
+    <main class="app-main">
+      <header class="app-topbar no-print">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Relatório de Alta Hospitalar</h2>
+            <p>Registro formal de desospitalização, liberação de leito e prescrição domiciliar</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-outline" onclick="window.print()">🖨️ Imprimir Documento</button>
+          <button class="btn btn-outline btn-sm" onclick="carregarListaAltas()">📋 Histórico de Altas</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Formulário e Visualizador de Alta em Formato Documental -->
+        <div class="document-paper print-document">
+          <div class="doc-hospital-header">
+            <div class="doc-brand">
+              <div class="doc-brand-icon">🎀</div>
+              <div class="doc-brand-text">
+                <h2>Tayla — Hospital Geral & Maternidade</h2>
+                <span>CNPJ: 12.345.678/0001-90 • Diretoria Clínica & Assistencial</span>
+              </div>
+            </div>
+            <div class="doc-stamp">
+              Alta Médica
+            </div>
+          </div>
+
+          <form id="formAlta" onsubmit="concluirAlta(event)">
+            <input type="hidden" id="altaPacienteId">
+            <input type="hidden" id="altaInternacaoId">
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; margin-bottom: 22px;">
+              <h3 style="font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">Identificação do Paciente</h3>
+              <div class="form-grid">
+                <div class="form-group col-span-2">
+                  <label for="altaNome">Nome do Paciente <span class="required">*</span></label>
+                  <input type="text" id="altaNome" placeholder="Digite ou selecione o paciente" required>
+                </div>
+                <div class="form-group">
+                  <label for="altaCpf">CPF do Paciente</label>
+                  <input type="text" id="altaCpf" placeholder="000.000.000-00">
+                </div>
+                <div class="form-group">
+                  <label for="altaTipo">Motivo / Tipo de Alta</label>
+                  <select id="altaTipo">
+                    <option value="Curado/Melhorado">Curado / Melhora Clínica</option>
+                    <option value="A pedido">A Pedido do Paciente / Responsável</option>
+                    <option value="Transferência Externa">Transferência para Outro Hospital</option>
+                    <option value="Óbito">Óbito</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group col-span-2">
+                <label for="altaResumo">Resumo da Evolução Clínica e Diagnóstico de Saída <span class="required">*</span></label>
+                <textarea id="altaResumo" placeholder="Descreva brevemente a resposta ao tratamento, exames de controle normais, condições de alta..." required></textarea>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="altaPrescricao">Prescrição Domiciliar de Continuidade</label>
+                <textarea id="altaPrescricao" placeholder="Medicamentos que o paciente deve continuar tomando em casa, dosagens e horários..."></textarea>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="altaOrientacoes">Orientações Gerais, Dieta e Sinais de Alarme</label>
+                <textarea id="altaOrientacoes" placeholder="Orientações de repouso, dieta, cuidados com curativo e retorno imediato ao Pronto-Socorro se sinais de alerta..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="altaRetorno">Previsão de Retorno / Consulta Ambulatorial</label>
+                <input type="text" id="altaRetorno" placeholder="Ex: Retorno em 7 dias com Dr. Roberto Santos">
+              </div>
+
+              <div class="form-group">
+                <label for="altaData">Data e Horário da Alta</label>
+                <input type="text" id="altaData" readonly>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="altaMedico">Médico Assistente Responsável</label>
+                <input type="text" id="altaMedico" value="Dr. Roberto Santos — CRM/SP 198452">
+              </div>
+            </div>
+
+            <div class="doc-signature-line">
+              <div class="sig-box">
+                <div id="sigMedicoNome" style="margin-bottom: 2px;">Dr. Roberto Santos</div>
+                <div style="font-size: 11px; color: var(--text-muted);" id="sigCrm">CRM/SP 198452 • Médico Assistente</div>
+              </div>
+            </div>
+
+            <div class="no-print" style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px;">
+              <button type="submit" class="btn btn-primary btn-lg" id="btnSalvarAlta">
+                ✅ Confirmar Alta Médica & Liberar Leito
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Histórico de Altas Realizadas -->
+        <div class="card no-print">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📋</span>
+              <span>Histórico de Altas Emitidas Recentemente</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Paciente</th>
+                  <th>Tipo de Alta</th>
+                  <th>Médico</th>
+                  <th>Resumo Clínico</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaAltasBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                    Carregando histórico de altas...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth();
+    initAppLayout('alta');
+
+    // Data/hora atual
+    const agora = new Date();
+    document.getElementById('altaData').value = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+    // Verifica se veio com dados pré-carregados da tela de internação ou atendimento
+    const pre = localStorage.getItem('dadosParaAlta');
+    if (pre) {
+      try {
+        const d = JSON.parse(pre);
+        document.getElementById('altaPacienteId').value = d.pacienteId || '';
+        document.getElementById('altaNome').value = d.pacienteNome || '';
+        document.getElementById('altaInternacaoId').value = d.internacaoId || '';
+        localStorage.removeItem('dadosParaAlta');
+        showToast(`Dados de ${d.pacienteNome} carregados para alta hospitalar.`, 'info');
+      } catch (e) {}
+    }
+
+    async function concluirAlta(e) {
+      e.preventDefault();
+      const nome = document.getElementById('altaNome').value.trim();
+      if (!nome) {
+        showToast('Informe o nome do paciente.', 'warning');
+        return;
+      }
+
+      const payload = {
+        pacienteId: document.getElementById('altaPacienteId').value || null,
+        pacienteNome: nome,
+        pacienteCpf: document.getElementById('altaCpf').value.trim(),
+        internacaoId: document.getElementById('altaInternacaoId').value || null,
+        tipoAlta: document.getElementById('altaTipo').value,
+        resumoAtendimento: document.getElementById('altaResumo').value.trim(),
+        prescricaoDomiciliar: document.getElementById('altaPrescricao').value.trim(),
+        orientacoes: document.getElementById('altaOrientacoes').value.trim(),
+        retornoDias: document.getElementById('altaRetorno').value.trim(),
+        medicoResponsavel: document.getElementById('altaMedico').value.trim()
+      };
+
+      try {
+        const res = await apiFetch('/api/altas', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        showToast(res.mensagem || 'Alta hospitalar registrada com sucesso!', 'success');
+        carregarListaAltas();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    async function carregarListaAltas() {
+      try {
+        const altas = await apiFetch('/api/altas');
+        const tbody = document.getElementById('tabelaAltasBody');
+
+        if (!altas || altas.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma alta registrada.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = altas.map(a => `
+          <tr>
+            <td>${formatDate(a.criadaEm)}</td>
+            <td><strong>${escapeHtml(a.pacienteNome)}</strong></td>
+            <td><span class="badge badge-livre">${escapeHtml(a.tipoAlta)}</span></td>
+            <td>${escapeHtml(a.medicoResponsavel)}</td>
+            <td>${escapeHtml(a.resumoAtendimento || '--')}</td>
+            <td style="text-align: right;">
+              <button class="btn btn-outline btn-sm" onclick="visualizarAlta('${a.id}')">📄 Ver</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showToast('Erro ao listar altas.', 'danger');
+      }
+    }
+
+    async function visualizarAlta(id) {
+      try {
+        const res = await apiFetch(`/api/altas/${id}`);
+        const a = res.alta;
+        if (!a) return;
+
+        document.getElementById('altaNome').value = a.pacienteNome;
+        document.getElementById('altaCpf').value = a.pacienteCpf || '';
+        document.getElementById('altaTipo').value = a.tipoAlta;
+        document.getElementById('altaResumo').value = a.resumoAtendimento || '';
+        document.getElementById('altaPrescricao').value = a.prescricaoDomiciliar || '';
+        document.getElementById('altaOrientacoes').value = a.orientacoes || '';
+        document.getElementById('altaRetorno').value = a.retornoDias || '';
+        document.getElementById('altaMedico').value = a.medicoResponsavel || '';
+        document.getElementById('sigMedicoNome').textContent = a.medicoResponsavel || 'Médico Assistente';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast('Documento de alta carregado para visualização/impressão.', 'info');
+      } catch (err) {
+        showToast('Erro ao carregar documento de alta.', 'danger');
+      }
+    }
+
+    carregarListaAltas();
+  </script>
+</body>
+</html>

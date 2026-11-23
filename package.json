@@ -1,0 +1,27 @@
+{
+  "name": "tayla-hospital",
+  "version": "2.0.0",
+  "description": "Tayla — Sistema de Gestão Hospitalar Profissional",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "seed": "node backend/db/seed.js",
+    "test": "node tests/test_all.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  },
+  "keywords": [
+    "hospital",
+    "gestao-hospitalar",
+    "prontuario-eletronico",
+    "triagem-manchester",
+    "leitos",
+    "farmacia"
+  ],
+  "author": "Equipe Amandinha",
+  "license": "ISC",
+  "type": "commonjs"
+}

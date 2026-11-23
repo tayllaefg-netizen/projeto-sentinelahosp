@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Administrativo — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Container da Sidebar Injetada -->
+    <div id="sidebar-container"></div>
+
+    <!-- Área Principal -->
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Painel de Gestão Hospitalar</h2>
+            <p>Métricas operacionais, ocupação de leitos e fluxo de pacientes em tempo real</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="system-status-pill">
+            <span class="status-dot"></span>
+            <span>Sistema Operacional</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="carregarMetricas()">🔄 Atualizar</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Grid de Estatísticas Principais -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pink">👥</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valTotalPacientes">--</div>
+              <div class="stat-label">Total de Pacientes</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon navy">📋</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valAtendimentosHoje">--</div>
+              <div class="stat-label">Consultas Realizadas Hoje</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon orange">🩺</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valAguardandoTriagem">--</div>
+              <div class="stat-label">Aguardando Triagem</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon red">👨‍⚕️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valAguardandoMedico">--</div>
+              <div class="stat-label">Aguardando Médico</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon blue">🛏️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valInternacoesAtivas">--</div>
+              <div class="stat-label">Internações Ativas</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon green">📊</div>
+            <div class="stat-info">
+              <div class="stat-value" id="valTaxaOcupacao">--%</div>
+              <div class="stat-label">Ocupação de Leitos</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;">
+          <!-- Card de Distribuição Manchester -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>⏱️</span>
+                <span>Fila Médica por Protocolo de Manchester</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;" id="containerManchesterFila">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="badge badge-vermelho badge-manchester">🔴 Emergência (0 min)</span>
+                <strong id="manchVermelho">0 pacientes</strong>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="badge badge-laranja badge-manchester">🟠 Muito Urgente (10 min)</span>
+                <strong id="manchLaranja">0 pacientes</strong>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="badge badge-amarelo badge-manchester">🟡 Urgente (50 min)</span>
+                <strong id="manchAmarelo">0 pacientes</strong>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="badge badge-verde badge-manchester">🟢 Pouco Urgente (120 min)</span>
+                <strong id="manchVerde">0 pacientes</strong>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="badge badge-azul badge-manchester">🔵 Não Urgente (240 min)</span>
+                <strong id="manchAzul">0 pacientes</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card de Ocupação de Leitos -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>🛏️</span>
+                <span>Censo Hospitalar de Leitos</span>
+              </div>
+              <a href="internacao.html" class="btn btn-outline btn-sm">Ver Mapa</a>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Total de Leitos Hospitalares:</span>
+                <strong id="censoTotal">--</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge badge-livre">Leitos Livres:</span>
+                <strong id="censoLivres" style="color: var(--success);">--</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge badge-ocupado">Leitos Ocupados:</span>
+                <strong id="censoOcupados" style="color: var(--danger);">--</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge badge-manutencao">Leitos em Manutenção:</span>
+                <strong id="censoManutencao" style="color: var(--warning);">--</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção de Alertas do Almoxarifado e Farmácia -->
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-header">
+            <div class="card-title">
+              <span>⚠️</span>
+              <span>Alertas Críticos de Suprimentos & Farmácia</span>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <div>
+              <h4 style="font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 10px;">
+                💊 Farmácia (Estoque no Mínimo): <span id="countAlertasFarmacia" class="badge badge-manchester badge-vermelho">0</span>
+              </h4>
+              <ul id="listaAlertasFarmacia" style="list-style: none; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">
+                <li style="color: var(--text-muted);">Nenhum alerta crítico no momento.</li>
+              </ul>
+            </div>
+            <div>
+              <h4 style="font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 10px;">
+                📦 Almoxarifado (Insumos Baixos/Zerados): <span id="countAlertasAlmox" class="badge badge-manchester badge-laranja">0</span>
+              </h4>
+              <ul id="listaAlertasAlmox" style="list-style: none; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">
+                <li style="color: var(--text-muted);">Estoque normalizado.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth();
+    initAppLayout('dashboard');
+
+    async function carregarMetricas() {
+      try {
+        const data = await apiFetch('/api/dashboard/metricas');
+
+        document.getElementById('valTotalPacientes').textContent = data.totalPacientes;
+        document.getElementById('valAtendimentosHoje').textContent = data.atendimentosHoje;
+        document.getElementById('valAguardandoTriagem').textContent = data.aguardandoTriagem;
+        document.getElementById('valAguardandoMedico').textContent = data.aguardandoMedico;
+        document.getElementById('valInternacoesAtivas').textContent = data.internacoesAtivas;
+        document.getElementById('valTaxaOcupacao').textContent = `${data.leitos.taxaOcupacao}%`;
+
+        // Manchester
+        document.getElementById('manchVermelho').textContent = `${data.manchesterFila.vermelho} pacientes`;
+        document.getElementById('manchLaranja').textContent = `${data.manchesterFila.laranja} pacientes`;
+        document.getElementById('manchAmarelo').textContent = `${data.manchesterFila.amarelo} pacientes`;
+        document.getElementById('manchVerde').textContent = `${data.manchesterFila.verde} pacientes`;
+        document.getElementById('manchAzul').textContent = `${data.manchesterFila.azul} pacientes`;
+
+        // Censo
+        document.getElementById('censoTotal').textContent = data.leitos.total;
+        document.getElementById('censoLivres').textContent = data.leitos.livres;
+        document.getElementById('censoOcupados').textContent = data.leitos.ocupados;
+        document.getElementById('censoManutencao').textContent = data.leitos.manutencao;
+
+        // Alertas Farmácia
+        document.getElementById('countAlertasFarmacia').textContent = data.alertas.farmaciaEstoqueBaixo;
+        const ulFarm = document.getElementById('listaAlertasFarmacia');
+        if (data.alertas.itensFarmaciaAlerta && data.alertas.itensFarmaciaAlerta.length > 0) {
+          ulFarm.innerHTML = data.alertas.itensFarmaciaAlerta.map(m => `
+            <li style="padding: 6px 10px; background: #FFF5F7; border-left: 3px solid var(--danger); border-radius: 4px;">
+              <strong>${escapeHtml(m.nome)}</strong>: Restam apenas <b>${m.quantidade}</b> ${escapeHtml(m.unidade || 'un')} (Mínimo: ${m.estoqueMinimo})
+            </li>
+          `).join('');
+        } else {
+          ulFarm.innerHTML = '<li style="color: var(--success); font-weight: 600;">✅ Todos os medicamentos com estoque seguro.</li>';
+        }
+
+        // Alertas Almoxarifado
+        document.getElementById('countAlertasAlmox').textContent = data.alertas.almoxarifadoEstoqueBaixo;
+        const ulAlmox = document.getElementById('listaAlertasAlmox');
+        if (data.alertas.itensAlmoxarifadoAlerta && data.alertas.itensAlmoxarifadoAlerta.length > 0) {
+          ulAlmox.innerHTML = data.alertas.itensAlmoxarifadoAlerta.map(item => `
+            <li style="padding: 6px 10px; background: #FFFBF0; border-left: 3px solid var(--warning); border-radius: 4px;">
+              <strong>${escapeHtml(item.nome)}</strong>: Saldo <b>${item.quantidade}</b> ${escapeHtml(item.unidade || 'un')} (Mínimo: ${item.estoqueMinimo})
+            </li>
+          `).join('');
+        } else {
+          ulAlmox.innerHTML = '<li style="color: var(--success); font-weight: 600;">✅ Insumos e materiais abastecidos.</li>';
+        }
+
+      } catch (err) {
+        showToast('Erro ao carregar dados do dashboard.', 'danger');
+      }
+    }
+
+    carregarMetricas();
+    // Atualização periódica a cada 15 segundos
+    setInterval(carregarMetricas, 15000);
+  </script>
+</body>
+</html>

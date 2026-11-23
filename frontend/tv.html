@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Chamada — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1A2533 0%, #26364A 50%, #151E2B 100%);
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .tv-header {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+      padding: 18px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(217, 142, 173, 0.3);
+    }
+
+    .tv-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tv-brand-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 14px rgba(217, 142, 173, 0.4);
+    }
+
+    .tv-brand-name h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: -0.5px;
+    }
+
+    .tv-brand-name span {
+      font-size: 13px;
+      color: var(--primary-light);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tv-clock {
+      text-align: right;
+    }
+
+    .tv-time {
+      font-size: 32px;
+      font-weight: 900;
+      color: #FFFFFF;
+      line-height: 1;
+    }
+
+    .tv-date {
+      font-size: 14px;
+      color: #CBD5E1;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .tv-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 28px;
+      padding: 28px 36px;
+      min-height: 0;
+    }
+
+    /* CARD DE CHAMADA PRINCIPAL */
+    .tv-main-call {
+      background: rgba(255, 255, 255, 0.05);
+      border: 3px solid rgba(217, 142, 173, 0.4);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+      position: relative;
+      animation: pulseGlow 4s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 10px 30px rgba(217, 142, 173, 0.15); border-color: rgba(217, 142, 173, 0.35); }
+      100% { box-shadow: 0 15px 50px rgba(217, 142, 173, 0.35); border-color: rgba(217, 142, 173, 0.65); }
+    }
+
+    .call-tag {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #FFFFFF;
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      padding: 8px 24px;
+      border-radius: 30px;
+      letter-spacing: 1.5px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 16px rgba(217, 142, 173, 0.4);
+    }
+
+    .call-patient-name {
+      font-size: 58px;
+      font-weight: 900;
+      color: #FFFFFF;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      max-width: 90%;
+      word-break: break-word;
+    }
+
+    .call-destination {
+      background: #FFFFFF;
+      color: var(--navy);
+      padding: 16px 36px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .dest-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .dest-room {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+    }
+
+    /* HISTÓRICO LATERAL */
+    .tv-history-panel {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-title {
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary-light);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.06);
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hist-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .hist-room {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-top: 2px;
+    }
+
+    .hist-time {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+
+    .tv-footer-ticker {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 10px 36px;
+      font-size: 13px;
+      color: #94A3B8;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO DA TV -->
+  <header class="tv-header">
+    <div class="tv-brand">
+      <div class="tv-brand-icon">🎀</div>
+      <div class="tv-brand-name">
+        <h1>Hospital Amandinha</h1>
+        <span>Painel Eletrônico de Atendimento & Triagem</span>
+      </div>
+    </div>
+    <div class="tv-clock">
+      <div class="tv-time" id="clockTime">00:00:00</div>
+      <div class="tv-date" id="clockDate">--/--/----</div>
+    </div>
+  </header>
+
+  <!-- CORPO DO PAINEL DE CHAMADA -->
+  <div class="tv-layout">
+    <!-- ÁREA DE DESTAQUE DA ÚLTIMA CHAMADA -->
+    <div class="tv-main-call">
+      <div class="call-tag" id="mainCallTag">📢 CHAMADA ATUAL</div>
+      <div class="call-patient-name" id="mainCallName">Aguardando Chamada...</div>
+      <div class="call-destination" id="mainCallBox">
+        <span class="dest-label">DIRIJA-SE AO:</span>
+        <span class="dest-room" id="mainCallDest">RECEPÇÃO</span>
+      </div>
+    </div>
+
+    <!-- PAINEL LATERAL COM HISTÓRICO -->
+    <div class="tv-history-panel">
+      <div class="history-title">
+        <span>⏱️</span>
+        <span>Últimas Chamadas</span>
+      </div>
+      <div class="history-list" id="historyListContainer">
+        <p style="text-align: center; color: #94A3B8; padding: 20px;">Nenhuma chamada recente.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ INFORMATIVO -->
+  <footer class="tv-footer-ticker">
+    <span>💡 Por favor, dirija-se com calma ao local indicado portando seu documento oficial com foto.</span>
+    <span>🔔 Mantenha seu celular no modo silencioso</span>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    let ultimaChamadaId = null;
+
+    // Relógio em tempo real
+    function atualizarRelogio() {
+      const agora = new Date();
+      document.getElementById('clockTime').textContent = agora.toLocaleTimeString('pt-BR');
+      document.getElementById('clockDate').textContent = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    setInterval(atualizarRelogio, 1000);
+    atualizarRelogio();
+
+    // Consulta periódica à API de chamada
+    async function pollingTv() {
+      try {
+        const res = await fetch('/api/tv/chamada');
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const chamada = data.chamada;
+        const historico = data.historico || [];
+
+        if (chamada) {
+          // Detecta nova chamada para disparar som
+          if (chamada.id && chamada.id !== ultimaChamadaId) {
+            ultimaChamadaId = chamada.id;
+            playHospitalChime();
+
+            // Efeito visual de destaque
+            const card = document.querySelector('.tv-main-call');
+            card.style.transform = 'scale(1.02)';
+            setTimeout(() => card.style.transform = 'scale(1)', 400);
+          }
+
+          document.getElementById('mainCallName').textContent = chamada.paciente || 'Paciente';
+          document.getElementById('mainCallDest').textContent = `${chamada.localTipo || 'LOCAL'} ${chamada.localNumero || ''}`;
+        }
+
+        // Renderiza histórico
+        const histContainer = document.getElementById('historyListContainer');
+        if (historico.length > 0) {
+          histContainer.innerHTML = historico.slice(0, 6).map(h => `
+            <div class="history-item">
+              <div>
+                <div class="hist-name">${escapeHtml(h.paciente)}</div>
+                <div class="hist-room">${escapeHtml(h.localTipo)} ${escapeHtml(h.localNumero)}</div>
+              </div>
+              <div class="hist-time">${escapeHtml(h.hora || '')}</div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Falha na atualização do painel de TV:', err);
+      }
+    }
+
+    // Inicializa polling a cada 2.5 segundos
+    pollingTv();
+    setInterval(pollingTv, 2500);
+
+    // Permite iniciar áudio com clique do operador
+    document.body.addEventListener('click', () => {
+      playHospitalChime();
+    }, { once: true });
+  </script>
+</body>
+</html>

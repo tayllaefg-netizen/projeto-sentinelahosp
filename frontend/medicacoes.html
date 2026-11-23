@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmácia Hospitalar — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Farmácia Hospitalar & Controle de Medicações</h2>
+            <p>Gestão de estoque, lotes, validades, dispensação e rastreabilidade</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="abrirModalNovoMedicamento()">
+            <span>➕</span> <span>Novo Medicamento</span>
+          </button>
+          <button class="btn btn-outline" onclick="abrirModalMovimentacao()">
+            <span>📦</span> <span>Entrada / Saída</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Indicadores da Farmácia -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pink">💊</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardTotalMeds">0</div>
+              <div class="stat-label">Itens Cadastrados</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">⚠️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardEstoqueBaixo" style="color: var(--danger);">0</div>
+              <div class="stat-label">Estoque Crítico / Baixo</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">📅</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardVencimentoProximo" style="color: var(--warning);">0</div>
+              <div class="stat-label">Validade Próxima (&lt; 60 dias)</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">📋</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardDispensacoesHoje">0</div>
+              <div class="stat-label">Dispensações Realizadas</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Catálogo e Estoque Atual -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>💊</span>
+              <span>Estoque Atual de Medicamentos</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="buscaMed" placeholder="🔍 Filtrar medicamento ou lote..." oninput="filtrarMedicamentos()" style="height: 36px; width: 260px;">
+              <button class="btn btn-outline btn-sm" onclick="carregarFarmacia()">🔄 Atualizar</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Medicamento / Apresentação</th>
+                  <th>Princípio Ativo</th>
+                  <th>Lote</th>
+                  <th>Validade</th>
+                  <th>Localização</th>
+                  <th>Saldo Disponível</th>
+                  <th>Status Estoque</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaMedicamentosBody">
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    Carregando estoque de medicamentos...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Fila de Prescrições Recentes para Dispensação -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🩺</span>
+              <span>Prescrições Médicas Emitidas Recentemente</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Paciente</th>
+                  <th>Médico</th>
+                  <th>Itens Prescritos</th>
+                  <th style="text-align: right;">Dispensação</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaPrescricoesBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                    Carregando prescrições...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Histórico de Movimentações -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📊</span>
+              <span>Histórico de Entradas, Saídas e Dispensações</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Tipo</th>
+                  <th>Medicamento</th>
+                  <th>Quantidade</th>
+                  <th>Saldo Restante</th>
+                  <th>Responsável</th>
+                  <th>Motivo / Paciente</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaMovimentacoesBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                    Carregando histórico...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR NOVO MEDICAMENTO -->
+  <div class="modal-backdrop" id="modalNovoMed">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Cadastrar Medicamento na Farmácia</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalNovoMed')">&times;</button>
+      </div>
+      <form id="formNovoMed" onsubmit="salvarNovoMedicamento(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="medNome">Nome Comercial do Medicamento <span class="required">*</span></label>
+              <input type="text" id="medNome" placeholder="Ex: Dipirona Monoidratada" required>
+            </div>
+            <div class="form-group col-span-2">
+              <label for="medPrincipio">Princípio Ativo</label>
+              <input type="text" id="medPrincipio" placeholder="Ex: Metamizol Sódico">
+            </div>
+            <div class="form-group">
+              <label for="medApresentacao">Forma Farmacêutica / Apresentação</label>
+              <select id="medApresentacao">
+                <option value="Ampola">Ampola Injetável</option>
+                <option value="Comprimido">Comprimido / Drágea</option>
+                <option value="Frasco-ampola">Frasco-ampola</option>
+                <option value="Bolsa">Bolsa para Infusão</option>
+                <option value="Frasco Líquido">Frasco Xarope/Gotas</option>
+                <option value="Pomada">Pomada / Creme</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="medConcentracao">Concentração</label>
+              <input type="text" id="medConcentracao" placeholder="Ex: 500mg/mL (2mL)">
+            </div>
+            <div class="form-group">
+              <label for="medLote">Número do Lote <span class="required">*</span></label>
+              <input type="text" id="medLote" placeholder="LT-2026A1" required>
+            </div>
+            <div class="form-group">
+              <label for="medValidade">Data de Validade <span class="required">*</span></label>
+              <input type="date" id="medValidade" required>
+            </div>
+            <div class="form-group">
+              <label for="medQtd">Quantidade Inicial <span class="required">*</span></label>
+              <input type="number" id="medQtd" min="0" value="100" required>
+            </div>
+            <div class="form-group">
+              <label for="medEstoqueMin">Estoque Mínimo de Alerta</label>
+              <input type="number" id="medEstoqueMin" min="1" value="20" required>
+            </div>
+            <div class="form-group col-span-2">
+              <label for="medLocalizacao">Localização Física no Estoque</label>
+              <input type="text" id="medLocalizacao" placeholder="Ex: Armário A, Prateleira 2, Gaveta Injetáveis">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoMed')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Cadastrar Medicamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MOVIMENTAÇÃO DE ESTOQUE (ENTRADA / SAÍDA) -->
+  <div class="modal-backdrop" id="modalMovimentacao">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Movimentação de Estoque Farmacêutico</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalMovimentacao')">&times;</button>
+      </div>
+      <form id="formMovimentacao" onsubmit="salvarMovimentacao(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="movMedId">Medicamento <span class="required">*</span></label>
+            <select id="movMedId" required></select>
+          </div>
+          <div class="form-group">
+            <label for="movTipo">Tipo de Movimentação <span class="required">*</span></label>
+            <select id="movTipo" required>
+              <option value="entrada">Entrada (Compra / Recebimento de Lote)</option>
+              <option value="saida">Saída (Ajuste de Estoque)</option>
+              <option value="perda">Perda / Avaria / Vencimento</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="movQtd">Quantidade <span class="required">*</span></label>
+            <input type="number" id="movQtd" min="1" value="10" required>
+          </div>
+          <div class="form-group">
+            <label for="movMotivo">Motivo da Movimentação</label>
+            <input type="text" id="movMotivo" placeholder="Ex: Recebimento de fornecedor NF 12345" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalMovimentacao')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Efetivar Movimentação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DISPENSAÇÃO RÁPIDA -->
+  <div class="modal-backdrop" id="modalDispensacao">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Dispensar Medicação para Paciente</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalDispensacao')">&times;</button>
+      </div>
+      <form id="formDispensacao" onsubmit="confirmarDispensacao(event)">
+        <input type="hidden" id="dispMedId">
+        <div class="modal-body">
+          <p id="dispMedInfo" style="font-weight: 800; color: var(--navy); margin-bottom: 12px;"></p>
+          <div class="form-group">
+            <label for="dispPaciente">Nome do Paciente / Leito <span class="required">*</span></label>
+            <input type="text" id="dispPaciente" placeholder="Ex: Mariana Silva Santos (Leito UTI-01)" required>
+          </div>
+          <div class="form-group">
+            <label for="dispQtd">Quantidade a Dispensar <span class="required">*</span></label>
+            <input type="number" id="dispQtd" min="1" value="1" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalDispensacao')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar Dispensação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth();
+    initAppLayout('medicacoes');
+
+    let medicamentosLista = [];
+
+    async function carregarFarmacia() {
+      try {
+        const [resMeds, resAlertas, resConsultas, resMovs] = await Promise.all([
+          apiFetch('/api/farmacia/medicamentos'),
+          apiFetch('/api/farmacia/alertas'),
+          apiFetch('/api/consultas'),
+          apiFetch('/api/farmacia/movimentacoes')
+        ]);
+
+        medicamentosLista = resMeds.medicamentos || [];
+
+        // Atualiza indicadores
+        document.getElementById('cardTotalMeds').textContent = medicamentosLista.length;
+        document.getElementById('cardEstoqueBaixo').textContent = resAlertas.estoqueBaixo?.length || 0;
+        document.getElementById('cardVencimentoProximo').textContent = resAlertas.vencimentoProximo?.length || 0;
+        const dispensacoes = (resMovs || []).filter(m => m.tipo === 'dispensacao').length;
+        document.getElementById('cardDispensacoesHoje').textContent = dispensacoes;
+
+        renderizarMedicamentos(medicamentosLista);
+        renderizarPrescricoes(resConsultas || []);
+        renderizarMovimentacoes(resMovs || []);
+      } catch (err) {
+        showToast('Erro ao carregar dados da farmácia.', 'danger');
+      }
+    }
+
+    function renderizarMedicamentos(lista) {
+      const tbody = document.getElementById('tabelaMedicamentosBody');
+
+      if (!lista || lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum medicamento encontrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(m => {
+        const isBaixo = m.quantidade <= m.estoqueMinimo;
+        const isZerado = m.quantidade === 0;
+
+        let statusBadge = '<span class="badge badge-livre">Adequado</span>';
+        if (isZerado) statusBadge = '<span class="badge badge-manchester badge-vermelho">ZERADO</span>';
+        else if (isBaixo) statusBadge = '<span class="badge badge-manchester badge-laranja">ESTOQUE BAIXO</span>';
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 800; color: var(--navy);">${escapeHtml(m.nome)}</div>
+              <small style="color: var(--text-muted);">${escapeHtml(m.apresentacao)} • ${escapeHtml(m.concentracao || '')}</small>
+            </td>
+            <td>${escapeHtml(m.principioAtivo || '--')}</td>
+            <td><code>${escapeHtml(m.lote)}</code></td>
+            <td>${escapeHtml(m.validade)}</td>
+            <td>${escapeHtml(m.localizacao || 'Farmácia Central')}</td>
+            <td><strong style="font-size: 15px; color: ${isBaixo ? 'var(--danger)' : 'var(--navy)'};">${m.quantidade} ${escapeHtml(m.unidade || 'un')}</strong></td>
+            <td>${statusBadge}</td>
+            <td style="text-align: right;">
+              <button class="btn btn-primary btn-sm" onclick="abrirDispensar('${m.id}', '${escapeHtml(m.nome)}', ${m.quantidade})" ${isZerado ? 'disabled' : ''}>
+                💊 Dispensar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderizarPrescricoes(consultas) {
+      const tbody = document.getElementById('tabelaPrescricoesBody');
+      const comPrescricao = consultas.filter(c => c.medicacao && c.medicacao.trim());
+
+      if (comPrescricao.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma prescrição pendente.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = comPrescricao.slice(0, 8).map(c => `
+        <tr>
+          <td>${formatDate(c.createdAt)}</td>
+          <td><strong>${escapeHtml(c.paciente)}</strong></td>
+          <td>${escapeHtml(c.medicoNome)}</td>
+          <td><pre style="font-family: inherit; margin: 0; white-space: pre-wrap; font-size: 12px; color: var(--navy);">${escapeHtml(c.medicacao)}</pre></td>
+          <td style="text-align: right;">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Dispensação assistida registrada para ${escapeHtml(c.paciente)}', 'success')">
+              ✅ Atender Prescrição
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderizarMovimentacoes(movs) {
+      const tbody = document.getElementById('tabelaMovimentacoesBody');
+
+      if (!movs || movs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma movimentação registrada.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = movs.slice(0, 10).map(m => {
+        let badgeTipo = `<span class="badge badge-info">${m.tipo.toUpperCase()}</span>`;
+        if (m.tipo === 'entrada') badgeTipo = '<span class="badge badge-livre">ENTRADA</span>';
+        else if (m.tipo === 'dispensacao') badgeTipo = '<span class="badge badge-manchester badge-verde">DISPENSAÇÃO</span>';
+        else if (m.tipo === 'perda') badgeTipo = '<span class="badge badge-manchester badge-vermelho">PERDA</span>';
+
+        return `
+          <tr>
+            <td>${formatDate(m.dataHora)}</td>
+            <td>${badgeTipo}</td>
+            <td><strong>${escapeHtml(m.medicamentoNome)}</strong></td>
+            <td><strong>${m.quantidade} un</strong></td>
+            <td>${m.saldoRestante} un</td>
+            <td>${escapeHtml(m.responsavel)}</td>
+            <td>${escapeHtml(m.motivo || m.pacienteNome || '--')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filtrarMedicamentos() {
+      const termo = document.getElementById('buscaMed').value.toLowerCase();
+      const filtrados = medicamentosLista.filter(m =>
+        m.nome.toLowerCase().includes(termo) ||
+        (m.principioAtivo && m.principioAtivo.toLowerCase().includes(termo)) ||
+        (m.lote && m.lote.toLowerCase().includes(termo))
+      );
+      renderizarMedicamentos(filtrados);
+    }
+
+    function abrirModalNovoMedicamento() {
+      document.getElementById('formNovoMed').reset();
+      openModal('modalNovoMed');
+    }
+
+    async function salvarNovoMedicamento(e) {
+      e.preventDefault();
+      const payload = {
+        nome: document.getElementById('medNome').value.trim(),
+        principioAtivo: document.getElementById('medPrincipio').value.trim(),
+        apresentacao: document.getElementById('medApresentacao').value,
+        concentracao: document.getElementById('medConcentracao').value.trim(),
+        lote: document.getElementById('medLote').value.trim(),
+        validade: document.getElementById('medValidade').value,
+        quantidade: parseInt(document.getElementById('medQtd').value, 10),
+        estoqueMinimo: parseInt(document.getElementById('medEstoqueMin').value, 10),
+        localizacao: document.getElementById('medLocalizacao').value.trim()
+      };
+
+      try {
+        await apiFetch('/api/farmacia/medicamentos', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showToast('Medicamento cadastrado no estoque com sucesso!', 'success');
+        closeModal('modalNovoMed');
+        carregarFarmacia();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function abrirModalMovimentacao() {
+      const sel = document.getElementById('movMedId');
+      sel.innerHTML = medicamentosLista.map(m => `<option value="${m.id}">${escapeHtml(m.nome)} (Saldo: ${m.quantidade})</option>`).join('');
+      openModal('modalMovimentacao');
+    }
+
+    async function salvarMovimentacao(e) {
+      e.preventDefault();
+      const payload = {
+        medicamentoId: document.getElementById('movMedId').value,
+        tipo: document.getElementById('movTipo').value,
+        quantidade: parseInt(document.getElementById('movQtd').value, 10),
+        motivo: document.getElementById('movMotivo').value.trim()
+      };
+
+      try {
+        await apiFetch('/api/farmacia/movimentacoes', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showToast('Movimentação de estoque concluída com sucesso!', 'success');
+        closeModal('modalMovimentacao');
+        carregarFarmacia();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function abrirDispensar(id, nome, saldo) {
+      document.getElementById('dispMedId').value = id;
+      document.getElementById('dispMedInfo').textContent = `${nome} (Saldo em Estoque: ${saldo} un)`;
+      document.getElementById('dispQtd').max = saldo;
+      document.getElementById('dispQtd').value = 1;
+      openModal('modalDispensacao');
+    }
+
+    async function confirmarDispensacao(e) {
+      e.preventDefault();
+      const payload = {
+        medicamentoId: document.getElementById('dispMedId').value,
+        quantidade: parseInt(document.getElementById('dispQtd').value, 10),
+        pacienteNome: document.getElementById('dispPaciente').value.trim()
+      };
+
+      try {
+        await apiFetch('/api/farmacia/dispensar', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showToast('Dispensação confirmada e deduzida do estoque!', 'success');
+        closeModal('modalDispensacao');
+        carregarFarmacia();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    carregarFarmacia();
+  </script>
+</body>
+</html>

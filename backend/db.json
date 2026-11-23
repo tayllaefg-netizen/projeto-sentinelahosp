@@ -1,0 +1,859 @@
+{
+  "usuarios": [
+    {
+      "id": "usr_admin",
+      "usuario": "admin",
+      "senha": "pbkdf2$100000$0099f0666850822c81197160e729af5b$49855b28756dd0eb87ebd64b560f76ba8194eb8f33581c174160cff8450e3138e046065be9d9786409d6d4ec4d30482484c5bc2edbab9a91fcb8c7c38f681f4a",
+      "nome": "Dra. Amanda Valente (Administradora)",
+      "tipo": "admin",
+      "crm_coren": "CRM/SP 999999",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.670Z"
+    },
+    {
+      "id": "usr_medico",
+      "usuario": "medico",
+      "senha": "pbkdf2$100000$2f13925c251b456c0755d53d488225ae$16c84da7df92e1227bf1794279dc89de20bf2b036aaa9ebe920d325da6bf96a27e4ee2d3b6ad10721d0c3f07de728a9e79ab946b8460a37ee97c9b4658563502",
+      "nome": "Dr. Roberto Santos",
+      "tipo": "medico",
+      "crm_coren": "CRM/SP 198452",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.703Z"
+    },
+    {
+      "id": "usr_triagem",
+      "usuario": "triagem",
+      "senha": "pbkdf2$100000$d955126bae8693c22f464121096cd701$1e8830a7d83dcbe8a40978d0badebff2562435bfcbd7faf37dca1b4f4b8d7a3a2a87029bfedbd3bbc221fa3a7d3ef0d0e002e30257f58dbfa4d80c3a79ff08fa",
+      "nome": "Enfª. Amanda Silveira",
+      "tipo": "triagem",
+      "crm_coren": "COREN/SP 43210-ENF",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.737Z"
+    },
+    {
+      "id": "usr_atendimento",
+      "usuario": "atendimento",
+      "senha": "pbkdf2$100000$090843b32b597a1a28a9ae394ee9fb3d$57fbd2354db45905dfcd9f2a50b8a3c8621fdf303ccee91e3040b39cc6949294956d30873fe2cbbf4634ec4ebb32e177d5c9a54aad2bab9d3433c7dec0e09b88",
+      "nome": "Fernanda Lima (Recepção)",
+      "tipo": "atendimento",
+      "crm_coren": "",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.769Z"
+    },
+    {
+      "id": "usr_farmacia",
+      "usuario": "farmacia",
+      "senha": "pbkdf2$100000$9bbb972cc9df3728c1cda94d7176e8f0$ec97aa98676361f4178834aeb65d5ed2a2f13c96822458744df0967c5fe0191772317af68d68ff5219d816b3c0e8df21891b86678a370c0f2ca9620cdbeaf5f3",
+      "nome": "Drª. Patrícia Mendes (Farmacêutica)",
+      "tipo": "farmaceutico",
+      "crm_coren": "CRF/SP 78945",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.802Z"
+    },
+    {
+      "id": "usr_almoxarifado",
+      "usuario": "almoxarifado",
+      "senha": "pbkdf2$100000$cf49ebbfdbe7b45e500c6de596d8d329$27f77ec10cb38ae9a32ca56de4183e6bd4893dafdf98c00f7b3d764e3d3d8f67584d16902a13e32a4639d4c1d3b6675732505f8b93233d993219e4cc04f0aa98",
+      "nome": "Carlos Eduardo (Almoxarife)",
+      "tipo": "almoxarife",
+      "crm_coren": "",
+      "ativo": true,
+      "criadoEm": "2026-11-16T14:50:33.835Z"
+    }
+  ],
+  "pacientes": [
+    {
+      "id": 1794840634017,
+      "nome": "Beatriz Vasconcelos",
+      "cpf": "529.982.247-25",
+      "rg": "22.333.444-5",
+      "dataNascimento": "1995-07-20",
+      "sexo": "Feminino",
+      "telefone": "(11) 98888-7777",
+      "email": "beatriz.v@email.com",
+      "endereco": {
+        "rua": "",
+        "numero": "",
+        "bairro": "",
+        "cidade": "",
+        "estado": "",
+        "cep": ""
+      },
+      "nomeMae": "",
+      "tipo": "Particular",
+      "convenioNumero": "",
+      "alergias": "Dipirona",
+      "status": "alta",
+      "senhaAtendimento": "P-03",
+      "createdAt": "2026-11-16T14:50:34.017Z",
+      "updatedAt": "2026-11-16T14:50:34.036Z",
+      "triagemId": 1794840634019,
+      "risco": "amarelo",
+      "ultimaConsultaId": 1794840634021,
+      "leitoId": "201",
+      "internacaoId": 1794840634029,
+      "altaId": 1794840634031
+    },
+    {
+      "id": 1700000001,
+      "nome": "Mariana Souza Santos",
+      "cpf": "123.456.789-09",
+      "rg": "45.123.890-X",
+      "dataNascimento": "1992-04-14",
+      "sexo": "Feminino",
+      "telefone": "(11) 98765-4321",
+      "email": "mariana.souza@email.com",
+      "endereco": {
+        "rua": "Rua das Flores",
+        "numero": "120",
+        "bairro": "Jardins",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "cep": "01415-000"
+      },
+      "tipo": "Particular",
+      "alergias": "Penicilina e Dipirona",
+      "status": "triagem",
+      "senhaAtendimento": "P-01",
+      "createdAt": "2026-11-16T13:50:33.835Z",
+      "updatedAt": "2026-11-16T13:50:33.835Z"
+    },
+    {
+      "id": 1700000002,
+      "nome": "Carlos Alberto Ferreira",
+      "cpf": "789.012.345-67",
+      "rg": "33.456.789-1",
+      "dataNascimento": "1968-11-23",
+      "sexo": "Masculino",
+      "telefone": "(11) 97654-3210",
+      "email": "carlos.ferreira@email.com",
+      "endereco": {
+        "rua": "Av. Paulista",
+        "numero": "1500",
+        "bairro": "Bela Vista",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "cep": "01310-200"
+      },
+      "tipo": "Convenio",
+      "convenioNumero": "UNIMED-884512-SP",
+      "alergias": "Nenhuma",
+      "status": "aguardando_medico",
+      "senhaAtendimento": "A-02",
+      "createdAt": "2026-11-16T12:50:33.835Z",
+      "updatedAt": "2026-11-16T13:20:33.835Z"
+    }
+  ],
+  "triagens": [
+    {
+      "id": 1794840634019,
+      "pacienteId": 1794840634017,
+      "nome": "Beatriz Vasconcelos",
+      "cpf": "",
+      "pressaoArterial": "130&#x2F;85",
+      "frequenciaCardiaca": 88,
+      "frequenciaRespiratoria": 20,
+      "temperatura": 39.2,
+      "saturacaoO2": 96,
+      "glicemia": "",
+      "escalaDor": 0,
+      "sintoma": "febre_alta",
+      "queixaPrincipal": "Febre de 39.2°C persistente há 24h associada a cefaleia",
+      "alergia": "Dipirona",
+      "comorbidades": "",
+      "observacao": "",
+      "risco": "amarelo",
+      "responsavel": "Enfª. Amanda Silveira (COREN/SP 43210-ENF)",
+      "iaRecomendacao": null,
+      "iaValidadaPor": null,
+      "status": "atendido",
+      "createdAt": "2026-11-16T14:50:34.019Z"
+    },
+    {
+      "id": 170000000201,
+      "pacienteId": 1700000002,
+      "nome": "Carlos Alberto Ferreira",
+      "cpf": "789.012.345-67",
+      "pressaoArterial": "150/95",
+      "frequenciaCardiaca": 98,
+      "frequenciaRespiratoria": 22,
+      "temperatura": 38.6,
+      "saturacaoO2": 95,
+      "glicemia": "142",
+      "escalaDor": 6,
+      "sintoma": "febre_dor_peito",
+      "queixaPrincipal": "Febre alta há 2 dias, tosse produtiva e dor torácica ao respirar fundo.",
+      "alergia": "Nenhuma conhecida",
+      "comorbidades": "Hipertensão Arterial Sistêmica",
+      "observacao": "Paciente taquipneico, febril e queixando-se de cansaço aos médios esforços.",
+      "risco": "amarelo",
+      "responsavel": "Enfª. Amanda Silveira (COREN/SP 43210-ENF)",
+      "status": "aguardando_medico",
+      "createdAt": "2026-11-16T13:20:33.835Z"
+    }
+  ],
+  "consultas": [
+    {
+      "id": 1794840634021,
+      "pacienteId": 1794840634017,
+      "paciente": "Beatriz Vasconcelos",
+      "triagemId": 1794840634019,
+      "medicoId": null,
+      "medicoNome": "Dr. Roberto Santos",
+      "crm": "CRM/SP 198452",
+      "queixa": "",
+      "anamnese": "",
+      "exameFisico": "",
+      "diagnostico": "Gastroenterite Aguda com Desidratação Leve",
+      "cid10": "A09",
+      "conduta": "Hidratação venosa e prescrição de antiemético. Encaminhamento para internação para monitorização.",
+      "medicacao": "Ondansetrona 8mg IV + Soro Fisiológico 500mL",
+      "prescricao": [],
+      "examesSolicitados": [],
+      "decisaoClinica": "internacao",
+      "obs": "",
+      "createdAt": "2026-11-16T14:50:34.021Z"
+    }
+  ],
+  "leitos": [
+    {
+      "id": "101",
+      "setor": "UTI Geral",
+      "quarto": "UTI-01",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "102",
+      "setor": "UTI Geral",
+      "quarto": "UTI-01",
+      "numero": "L-02",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "103",
+      "setor": "UTI Geral",
+      "quarto": "UTI-02",
+      "numero": "L-03",
+      "status": "Em manutenção",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "104",
+      "setor": "UTI Pediátrica",
+      "quarto": "UTIP-01",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "201",
+      "setor": "Enfermaria Adulto Feminino",
+      "quarto": "Q-201",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:34.036Z",
+      "internacaoId": null
+    },
+    {
+      "id": "202",
+      "setor": "Enfermaria Adulto Feminino",
+      "quarto": "Q-201",
+      "numero": "L-02",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "203",
+      "setor": "Enfermaria Adulto Feminino",
+      "quarto": "Q-202",
+      "numero": "L-03",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "301",
+      "setor": "Enfermaria Adulto Masculino",
+      "quarto": "Q-301",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "302",
+      "setor": "Enfermaria Adulto Masculino",
+      "quarto": "Q-301",
+      "numero": "L-02",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "401",
+      "setor": "Pediatria",
+      "quarto": "Q-401",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "402",
+      "setor": "Pediatria",
+      "quarto": "Q-401",
+      "numero": "L-02",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    },
+    {
+      "id": "501",
+      "setor": "Isolamento",
+      "quarto": "ISO-01",
+      "numero": "L-01",
+      "status": "Livre",
+      "pacienteId": null,
+      "pacienteNome": null,
+      "dataOcupacao": null,
+      "updatedAt": "2026-11-16T14:50:33.835Z"
+    }
+  ],
+  "internacoes": [
+    {
+      "id": 1794840634029,
+      "pacienteId": 1794840634017,
+      "pacienteNome": "Beatriz Vasconcelos",
+      "pacienteCpf": "",
+      "setor": "Enfermaria Adulto Feminino",
+      "quarto": "Q-201",
+      "leitoId": "201",
+      "leitoNumero": "L-01",
+      "medicoResponsavel": "Dr. Roberto Santos (CRM/SP 198452)",
+      "dataEntrada": "2026-11-16T14:50:34.029Z",
+      "motivo": "Hidratação venosa contínua e compensação de gastroenterite aguda",
+      "diagnostico": "A09 - Gastroenterite Aguda",
+      "dieta": "Pastosa branda",
+      "isolamento": false,
+      "evolucao": [
+        {
+          "data": "2026-11-16T14:50:34.029Z",
+          "profissional": "Dr. Roberto Santos (CRM/SP 198452)",
+          "nota": "Admissão hospitalar no leito Q-201-L-01. Motivo: Hidratação venosa contínua e compensação de gastroenterite aguda"
+        }
+      ],
+      "status": "alta",
+      "criadaEm": "2026-11-16T14:50:34.029Z",
+      "finalizadaEm": "2026-11-16T14:50:34.036Z",
+      "altaId": 1794840634031
+    }
+  ],
+  "movimentacoes_leito": [],
+  "altas": [
+    {
+      "id": 1794840634031,
+      "pacienteId": 1794840634017,
+      "pacienteNome": "Beatriz Vasconcelos",
+      "pacienteCpf": "",
+      "internacaoId": 1794840634029,
+      "consultaId": null,
+      "medicoResponsavel": "Dr. Roberto Santos",
+      "crm": "CRM/SP 198452",
+      "dataAlta": "2026-11-16",
+      "horaAlta": "11:50",
+      "tipoAlta": "Curado&#x2F;Melhorado",
+      "resumoAtendimento": "Paciente evoluiu afebril, hidratada e com tolerância oral restabelecida.",
+      "orientacoes": "Repouso, hidratação oral abundante (2L&#x2F;dia) e retorno se febre.",
+      "prescricaoDomiciliar": "Paracetamol 500mg VO de 6&#x2F;6h se dor ou febre.",
+      "retornoDias": "Conforme necessidade ou em 7 dias",
+      "criadaEm": "2026-11-16T14:50:34.036Z"
+    }
+  ],
+  "medicamentos": [
+    {
+      "id": 1,
+      "nome": "Dipirona Monoidratada",
+      "principioAtivo": "Dipirona",
+      "apresentacao": "Ampola 500mg/mL (2mL)",
+      "concentracao": "500mg/mL",
+      "lote": "LT-2026A1",
+      "validade": "2027-08-30",
+      "quantidade": 175,
+      "estoqueMinimo": 30,
+      "unidade": "ampola",
+      "localizacao": "Armário A1"
+    },
+    {
+      "id": 2,
+      "nome": "Paracetamol Comprimido",
+      "principioAtivo": "Paracetamol",
+      "apresentacao": "Comprimido 500mg",
+      "concentracao": "500mg",
+      "lote": "LT-2026B3",
+      "validade": "2027-11-15",
+      "quantidade": 250,
+      "estoqueMinimo": 50,
+      "unidade": "comprimido",
+      "localizacao": "Prateleira B2"
+    },
+    {
+      "id": 3,
+      "nome": "Amoxicilina + Clavulanato",
+      "principioAtivo": "Amoxicilina / Clavulanato de Potássio",
+      "apresentacao": "Comprimido 500/125mg",
+      "concentracao": "500mg + 125mg",
+      "lote": "LT-2026C4",
+      "validade": "2027-05-20",
+      "quantidade": 60,
+      "estoqueMinimo": 20,
+      "unidade": "comprimido",
+      "localizacao": "Armário Antibióticos"
+    },
+    {
+      "id": 4,
+      "nome": "Ceftriaxona Dissódica",
+      "principioAtivo": "Ceftriaxona",
+      "apresentacao": "Frasco-ampola 1g IV",
+      "concentracao": "1g",
+      "lote": "LT-2026D7",
+      "validade": "2027-09-10",
+      "quantidade": 45,
+      "estoqueMinimo": 15,
+      "unidade": "frasco-ampola",
+      "localizacao": "Armário Antibióticos"
+    },
+    {
+      "id": 5,
+      "nome": "Ondansetrona Cloridrato",
+      "principioAtivo": "Ondansetrona",
+      "apresentacao": "Ampola 8mg/4mL",
+      "concentracao": "2mg/mL",
+      "lote": "LT-2026E2",
+      "validade": "2027-07-01",
+      "quantidade": 85,
+      "estoqueMinimo": 25,
+      "unidade": "ampola",
+      "localizacao": "Gaveta Injetáveis"
+    },
+    {
+      "id": 6,
+      "nome": "Omeprazol Sódico",
+      "principioAtivo": "Omeprazol",
+      "apresentacao": "Frasco-ampola 40mg IV",
+      "concentracao": "40mg",
+      "lote": "LT-2026F9",
+      "validade": "2027-04-18",
+      "quantidade": 70,
+      "estoqueMinimo": 20,
+      "unidade": "frasco-ampola",
+      "localizacao": "Prateleira C1"
+    },
+    {
+      "id": 7,
+      "nome": "Soro Fisiológico 0.9%",
+      "principioAtivo": "Cloreto de Sódio 0.9%",
+      "apresentacao": "Bolsa Sistema Fechado 500mL",
+      "concentracao": "0.9%",
+      "lote": "LT-2026G5",
+      "validade": "2028-01-30",
+      "quantidade": 320,
+      "estoqueMinimo": 60,
+      "unidade": "bolsa",
+      "localizacao": "Pallet Soluções"
+    },
+    {
+      "id": 8,
+      "nome": "Soro Glicosado 5%",
+      "principioAtivo": "Glicose 5%",
+      "apresentacao": "Bolsa 500mL",
+      "concentracao": "5%",
+      "lote": "LT-2026H1",
+      "validade": "2028-02-15",
+      "quantidade": 140,
+      "estoqueMinimo": 40,
+      "unidade": "bolsa",
+      "localizacao": "Pallet Soluções"
+    },
+    {
+      "id": 9,
+      "nome": "Morfina Sulfato",
+      "principioAtivo": "Morfina",
+      "apresentacao": "Ampola 10mg/mL (1mL)",
+      "concentracao": "10mg/mL",
+      "lote": "LT-2026CTRL",
+      "validade": "2027-10-25",
+      "quantidade": 8,
+      "estoqueMinimo": 10,
+      "unidade": "ampola",
+      "localizacao": "Cofre Medicamentos Controlados"
+    },
+    {
+      "id": 10,
+      "nome": "Fentanila Citrato",
+      "principioAtivo": "Fentanila",
+      "apresentacao": "Ampola 50mcg/mL (5mL)",
+      "concentracao": "0.05mg/mL",
+      "lote": "LT-2026FEN",
+      "validade": "2026-12-15",
+      "quantidade": 5,
+      "estoqueMinimo": 10,
+      "unidade": "ampola",
+      "localizacao": "Cofre Medicamentos Controlados"
+    },
+    {
+      "id": 11,
+      "nome": "Loratadina Xarope",
+      "principioAtivo": "Loratadina",
+      "apresentacao": "Frasco 100mL (1mg/mL)",
+      "concentracao": "1mg/mL",
+      "lote": "LT-2026L1",
+      "validade": "2027-06-30",
+      "quantidade": 40,
+      "estoqueMinimo": 15,
+      "unidade": "frasco",
+      "localizacao": "Prateleira Líquidos"
+    },
+    {
+      "id": 12,
+      "nome": "Buscopan Composto",
+      "principioAtivo": "Butilbrometo de Escopolamina + Dipirona",
+      "apresentacao": "Ampola 5mL",
+      "concentracao": "4mg + 500mg/mL",
+      "lote": "LT-2026BC",
+      "validade": "2027-12-01",
+      "quantidade": 95,
+      "estoqueMinimo": 25,
+      "unidade": "ampola",
+      "localizacao": "Gaveta Injetáveis"
+    }
+  ],
+  "movimentacoes_farmacia": [
+    {
+      "id": 1794840634038,
+      "medicamentoId": 1,
+      "medicamentoNome": "Dipirona Monoidratada",
+      "tipo": "dispensacao",
+      "quantidade": 5,
+      "motivo": "Dispensação para paciente: Beatriz Vasconcelos",
+      "responsavel": "Dra. Amanda Valente (Administradora)",
+      "pacienteId": 1794840634017,
+      "pacienteNome": "Beatriz Vasconcelos",
+      "prescricaoId": null,
+      "saldoRestante": 175,
+      "dataHora": "2026-11-16T14:50:34.038Z"
+    }
+  ],
+  "materiais": [
+    {
+      "id": 1,
+      "nome": "Luvas de Procedimento Não Cirúrgica M",
+      "categoria": "Descartáveis",
+      "quantidade": 80,
+      "estoqueMinimo": 20,
+      "unidade": "caixa c/ 100",
+      "localizacao": "Corredor 1 - Estante A",
+      "lote": "ALM-101"
+    },
+    {
+      "id": 2,
+      "nome": "Seringa Descartável 10mL c/ Agulha 25x7",
+      "categoria": "Insumos Médicos",
+      "quantidade": 140,
+      "estoqueMinimo": 30,
+      "unidade": "caixa c/ 50",
+      "localizacao": "Corredor 1 - Estante B",
+      "lote": "ALM-102"
+    },
+    {
+      "id": 3,
+      "nome": "Cateter Intravenoso Periférico 20G (Jelco)",
+      "categoria": "Insumos Médicos",
+      "quantidade": 6,
+      "estoqueMinimo": 15,
+      "unidade": "caixa c/ 50",
+      "localizacao": "Corredor 2 - Estante A",
+      "lote": "ALM-103"
+    },
+    {
+      "id": 4,
+      "nome": "Equipo de Infusão Macrogotas c/ Injetor",
+      "categoria": "Insumos Médicos",
+      "quantidade": 95,
+      "estoqueMinimo": 25,
+      "unidade": "unidade",
+      "localizacao": "Corredor 2 - Estante B",
+      "lote": "ALM-104"
+    },
+    {
+      "id": 5,
+      "nome": "Máscara Cirúrgica Tripla c/ Elástico",
+      "categoria": "Descartáveis",
+      "quantidade": 110,
+      "estoqueMinimo": 20,
+      "unidade": "caixa c/ 50",
+      "localizacao": "Corredor 3 - Estante A",
+      "lote": "ALM-105"
+    },
+    {
+      "id": 6,
+      "nome": "Álcool Etílico em Gel 70% 1 Litro",
+      "categoria": "Higiene e Desinfecção",
+      "quantidade": 48,
+      "estoqueMinimo": 15,
+      "unidade": "frasco 1L",
+      "localizacao": "Corredor 3 - Estante C",
+      "lote": "ALM-106"
+    },
+    {
+      "id": 7,
+      "nome": "Gaze Estéril 7.5cm x 7.5cm 11 Fios",
+      "categoria": "Insumos Médicos",
+      "quantidade": 0,
+      "estoqueMinimo": 50,
+      "unidade": "pacote c/ 10",
+      "localizacao": "Corredor 1 - Estante C",
+      "lote": "ALM-107"
+    },
+    {
+      "id": 8,
+      "nome": "Fita Microporosa 50mm x 10m Hospitalar",
+      "categoria": "Insumos Médicos",
+      "quantidade": 32,
+      "estoqueMinimo": 10,
+      "unidade": "rolo",
+      "localizacao": "Corredor 2 - Estante C",
+      "lote": "ALM-108"
+    },
+    {
+      "id": 9,
+      "nome": "Avental Descartável Gramatura 30",
+      "categoria": "Descartáveis",
+      "quantidade": 75,
+      "estoqueMinimo": 20,
+      "unidade": "pacote c/ 10",
+      "localizacao": "Corredor 3 - Estante B",
+      "lote": "ALM-109"
+    },
+    {
+      "id": 10,
+      "nome": "Termômetro Digital Clínico Axilar",
+      "categoria": "Equipamentos",
+      "quantidade": 18,
+      "estoqueMinimo": 5,
+      "unidade": "unidade",
+      "localizacao": "Armário Equipamentos",
+      "lote": "ALM-110"
+    }
+  ],
+  "movimentacoes_almoxarifado": [
+    {
+      "id": 1794840634040,
+      "materialId": 1,
+      "materialNome": "Luvas de Procedimento Não Cirúrgica M",
+      "tipo": "saida",
+      "quantidade": 5,
+      "setorDestino": "UTI Geral",
+      "motivo": "Reposição semanal de EPI",
+      "responsavel": "Dra. Amanda Valente (Administradora)",
+      "fornecedor": "",
+      "notaFiscal": "",
+      "saldoRestante": 80,
+      "dataHora": "2026-11-16T14:50:34.040Z"
+    }
+  ],
+  "tv_chamada": {
+    "id": "1794840634042",
+    "localTipo": "CONSULTÓRIO",
+    "localNumero": "03",
+    "paciente": "Beatriz Vasconcelos",
+    "senha": "P-01",
+    "medico": "Dr. Roberto Santos",
+    "hora": "11:50",
+    "timestamp": 1794840634042
+  },
+  "tv_historico": [
+    {
+      "id": "1794840634042",
+      "localTipo": "CONSULTÓRIO",
+      "localNumero": "03",
+      "paciente": "Beatriz Vasconcelos",
+      "senha": "P-01",
+      "medico": "Dr. Roberto Santos",
+      "hora": "11:50",
+      "timestamp": 1794840634042
+    }
+  ],
+  "logs_auditoria": [
+    {
+      "id": 1794841783973,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "admin",
+      "perfil": "admin",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dra. Amanda Valente (Administradora)",
+        "tipo": "admin"
+      },
+      "criadoEm": "2026-11-16T15:09:43.973Z"
+    },
+    {
+      "id": 1794841238150,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "admin",
+      "perfil": "admin",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dra. Amanda Valente (Administradora)",
+        "tipo": "admin"
+      },
+      "criadoEm": "2026-11-16T15:00:38.150Z"
+    },
+    {
+      "id": 1794841174696,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "almoxarifado",
+      "perfil": "almoxarife",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Carlos Eduardo (Almoxarife)",
+        "tipo": "almoxarife"
+      },
+      "criadoEm": "2026-11-16T14:59:34.696Z"
+    },
+    {
+      "id": 1794840927398,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "medico",
+      "perfil": "medico",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dr. Roberto Santos",
+        "tipo": "medico"
+      },
+      "criadoEm": "2026-11-16T14:55:27.398Z"
+    },
+    {
+      "id": 1794840913092,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "admin",
+      "perfil": "admin",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dra. Amanda Valente (Administradora)",
+        "tipo": "admin"
+      },
+      "criadoEm": "2026-11-16T14:55:13.092Z"
+    },
+    {
+      "id": 1794840866503,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "medico",
+      "perfil": "medico",
+      "ip": "::1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dr. Roberto Santos",
+        "tipo": "medico"
+      },
+      "criadoEm": "2026-11-16T14:54:26.503Z"
+    },
+    {
+      "id": 1794840634013,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "atendimento",
+      "perfil": "atendimento",
+      "ip": "127.0.0.1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Fernanda Lima (Recepção)",
+        "tipo": "atendimento"
+      },
+      "criadoEm": "2026-11-16T14:50:34.013Z"
+    },
+    {
+      "id": 1794840633979,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "triagem",
+      "perfil": "triagem",
+      "ip": "127.0.0.1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Enfª. Amanda Silveira",
+        "tipo": "triagem"
+      },
+      "criadoEm": "2026-11-16T14:50:33.979Z"
+    },
+    {
+      "id": 1794840633944,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "medico",
+      "perfil": "medico",
+      "ip": "127.0.0.1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dr. Roberto Santos",
+        "tipo": "medico"
+      },
+      "criadoEm": "2026-11-16T14:50:33.944Z"
+    },
+    {
+      "id": 1794840633909,
+      "action": "LOGIN_SUCESSO",
+      "usuario": "admin",
+      "perfil": "admin",
+      "ip": "127.0.0.1",
+      "metodo": "POST",
+      "rota": "/login",
+      "detalhes": {
+        "nome": "Dra. Amanda Valente (Administradora)",
+        "tipo": "admin"
+      },
+      "criadoEm": "2026-11-16T14:50:33.909Z"
+    }
+  ]
+}

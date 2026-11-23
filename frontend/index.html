@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Tayla Sistema Hospitalar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FDF0F5 0%, #F7DCE7 50%, #EEF2F6 100%);
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      border: 3px solid var(--primary-light);
+      box-shadow: 0 20px 40px rgba(217, 142, 173, 0.22), 0 4px 12px rgba(38, 54, 74, 0.08);
+      padding: 40px 36px 32px;
+      position: relative;
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .brand-icon {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 18px rgba(217, 142, 173, 0.35);
+    }
+
+    .login-brand h2 {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
+
+    .login-brand p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .demo-accounts {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--border-pink);
+    }
+
+    .demo-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .demo-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .demo-pill {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .demo-pill:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .hospital-footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-brand">
+      <div class="brand-icon">🎀</div>
+      <h2>Tayla Hospital</h2>
+      <p>Sistema Integrado de Gestão & Prontuário</p>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="usuario">Usuário ou Matrícula</label>
+        <input type="text" id="usuario" placeholder="Digite seu usuário" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;" id="btnEntrar">
+        🔒 Acessar Sistema
+      </button>
+    </form>
+
+    <div class="demo-accounts">
+      <div class="demo-title">
+        <span>Credenciais para Demonstração Acadêmica:</span>
+      </div>
+      <div class="demo-badges">
+        <button type="button" class="demo-pill" onclick="fillDemo('admin', 'admin123')">👑 Admin</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('medico', '123')">👨‍⚕️ Médico</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('triagem', '123')">🩺 Enfermagem</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('atendimento', '123')">🪪 Recepção</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('farmacia', '123')">💊 Farmácia</button>
+        <button type="button" class="demo-pill" onclick="fillDemo('almoxarifado', '123')">📦 Almoxarifado</button>
+      </div>
+    </div>
+
+    <div class="hospital-footer-note">
+      Demonstração Acadêmica • Amandinha Hospital Pro • 2026
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    function fillDemo(usuario, senha) {
+      document.getElementById('usuario').value = usuario;
+      document.getElementById('senha').value = senha;
+      showToast(`Credenciais preenchidas para o perfil: ${usuario}`, 'info', 2000);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const usuario = document.getElementById('usuario').value.trim();
+      const senha = document.getElementById('senha').value;
+      const btn = document.getElementById('btnEntrar');
+
+      if (!usuario || !senha) {
+        showToast('Preencha o usuário e a senha.', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Autenticando...';
+
+      try {
+        const data = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ usuario, senha })
+        });
+
+        if (data.sucesso && data.token) {
+          setAuthSession(data.token, {
+            id: data.id,
+            usuario: data.usuario,
+            nome: data.nome,
+            tipo: data.tipo,
+            crm_coren: data.crm_coren
+          });
+
+          showToast(`Bem-vindo(a), ${data.nome}!`, 'success');
+
+          setTimeout(() => {
+            // Redirecionamento inteligente baseado no perfil
+            if (data.tipo === 'triagem') location.href = 'triagem.html';
+            else if (data.tipo === 'medico') location.href = 'medico.html';
+            else if (data.tipo === 'atendimento') location.href = 'atendimento.html';
+            else if (data.tipo === 'farmaceutico') location.href = 'medicacoes.html';
+            else if (data.tipo === 'almoxarife') location.href = 'almoxarifado.html';
+            else location.href = 'dashboard.html';
+          }, 800);
+        } else {
+          showToast(data.erro || 'Falha no login', 'danger');
+        }
+      } catch (err) {
+        showToast(err.message || 'Credenciais inválidas.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔒 Acessar Sistema';
+      }
+    }
+  </script>
+</body>
+</html>

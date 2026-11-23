@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/login",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/atendimento",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/triagem",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/triagens",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/consulta",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/consultas",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/medicacoes",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/lista-medicacoes",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/tv/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/internacoes(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/leitos(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/altas(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
+  ]
+}

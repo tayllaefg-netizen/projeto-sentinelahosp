@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Leitos & Internação — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Gestão de Leitos & Censo Hospitalar</h2>
+            <p>Mapa visual de leitos por setor, internações ativas, transferências e altas</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="abrirModalNovaInternacao()">
+            <span>➕</span> <span>Nova Internação</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="carregarCenso()">🔄 Atualizar Censo</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Barra de Indicadores de Leitos -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pink">🛏️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardTotalLeitos">0</div>
+              <div class="stat-label">Capacidade Total</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🟢</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardLeitosLivres" style="color: var(--success);">0</div>
+              <div class="stat-label">Leitos Disponíveis</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🔴</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardLeitosOcupados" style="color: var(--danger);">0</div>
+              <div class="stat-label">Leitos Ocupados</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">🛠️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardLeitosManutencao" style="color: var(--warning);">0</div>
+              <div class="stat-label">Em Manutenção</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Abas: Mapa de Leitos vs Tabela de Internações Ativas -->
+        <div class="card">
+          <div class="card-header">
+            <div style="display: flex; gap: 12px;">
+              <button class="btn btn-outline btn-sm active" id="tabBtnMapa" onclick="alternarAba('mapa')">🗺️ Mapa de Leitos por Setor</button>
+              <button class="btn btn-outline btn-sm" id="tabBtnTabela" onclick="alternarAba('tabela')">📋 Lista de Internações Ativas</button>
+            </div>
+          </div>
+
+          <!-- ABA 1: MAPA VISUAL DE LEITOS -->
+          <div id="abaMapaLeitos">
+            <div id="containerSetoresLeitos">
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">Carregando censo de leitos...</p>
+            </div>
+          </div>
+
+          <!-- ABA 2: LISTA DE PACIENTES INTERNADOS -->
+          <div id="abaTabelaInternacoes" style="display: none;">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Paciente</th>
+                    <th>Quarto / Leito</th>
+                    <th>Setor</th>
+                    <th>Médico Responsável</th>
+                    <th>Data Entrada</th>
+                    <th>Motivo / Diagnóstico</th>
+                    <th style="text-align: right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaInternacoesBody">
+                  <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                      Nenhuma internação ativa no momento.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: NOVA INTERNAÇÃO -->
+  <div class="modal-backdrop" id="modalInternacao">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Admissão / Internação Hospitalar</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalInternacao')">&times;</button>
+      </div>
+      <form id="formInternacao" onsubmit="salvarInternacao(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="intPacienteBusca">Paciente para Internação <span class="required">*</span></label>
+              <select id="intPacienteBusca" required onchange="aoSelecionarPacienteInternacao(this)">
+                <option value="">-- Selecione o Paciente --</option>
+              </select>
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="intLeito">Quarto & Leito Disponível <span class="required">*</span></label>
+              <select id="intLeito" required>
+                <option value="">-- Selecione um leito livre --</option>
+              </select>
+              <small style="color: var(--text-muted); font-size: 11px;">Apenas leitos com status 'Livre' são aceitos.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="intMedico">Médico Assistente Responsável</label>
+              <input type="text" id="intMedico" placeholder="Dr. Nome do Médico" value="Dr. Roberto Santos (CRM/SP 198452)">
+            </div>
+
+            <div class="form-group">
+              <label for="intDieta">Prescrição de Dieta</label>
+              <select id="intDieta">
+                <option value="Livre">Dieta Geral / Livre</option>
+                <option value="Branda">Dieta Branda</option>
+                <option value="Pastosa">Dieta Pastosa</option>
+                <option value="Líquida">Dieta Líquida</option>
+                <option value="Zero">Dieta Zero (Jejum para procedimento)</option>
+                <option value="Diabético">Dieta para Diabético</option>
+              </select>
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="intMotivo">Motivo Clínico da Admissão <span class="required">*</span></label>
+              <textarea id="intMotivo" placeholder="Descreva a indicação da internação, gravidade, suporte necessário..." required></textarea>
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="intDiagnostico">Diagnóstico de Internação</label>
+              <input type="text" id="intDiagnostico" placeholder="Ex: CID-10 J18 - Pneumonia bacteriana não especificada">
+            </div>
+
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="intIsolamento" style="width: 18px; height: 18px;">
+                <span>Exige Isolamento de Contato / Respiratório</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalInternacao')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnConfirmarInternacao">Confirmar Internação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TRANSFERÊNCIA DE LEITO -->
+  <div class="modal-backdrop" id="modalTransferencia">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Transferência de Leito</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalTransferencia')">&times;</button>
+      </div>
+      <form id="formTransferencia" onsubmit="salvarTransferencia(event)">
+        <input type="hidden" id="transfInternacaoId">
+        <div class="modal-body">
+          <p id="transfInfoPaciente" style="margin-bottom: 16px; font-weight: 700; color: var(--navy);"></p>
+          <div class="form-group">
+            <label for="transfNovoLeito">Novo Leito de Destino <span class="required">*</span></label>
+            <select id="transfNovoLeito" required></select>
+          </div>
+          <div class="form-group">
+            <label for="transfMotivo">Motivo da Transferência <span class="required">*</span></label>
+            <textarea id="transfMotivo" placeholder="Ex: Melhora clínica com encaminhamento da UTI para enfermaria" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalTransferencia')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Efetivar Transferência</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EVOLUÇÃO CLÍNICA -->
+  <div class="modal-backdrop" id="modalEvolucao">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalEvolucaoTitulo">Evolução do Paciente Internado</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalEvolucao')">&times;</button>
+      </div>
+      <form id="formEvolucao" onsubmit="salvarEvolucao(event)">
+        <input type="hidden" id="evolucaoInternacaoId">
+        <div class="modal-body">
+          <div id="historicoEvolucoes" style="max-height: 220px; overflow-y: auto; background: #F8FAFC; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+          </div>
+          <div class="form-group">
+            <label for="txtNovaEvolucao">Nova Nota de Evolução <span class="required">*</span></label>
+            <textarea id="txtNovaEvolucao" placeholder="Digite a evolução clínica do plantão..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalEvolucao')">Fechar</button>
+          <button type="submit" class="btn btn-primary">Adicionar Evolução</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth();
+    initAppLayout('internacao');
+
+    let leitosLista = [];
+    let internacoesLista = [];
+
+    async function carregarCenso() {
+      try {
+        const [resLeitos, resInternacoes] = await Promise.all([
+          apiFetch('/api/leitos'),
+          apiFetch('/api/internacoes?status=internado')
+        ]);
+
+        leitosLista = resLeitos.leitos || [];
+        internacoesLista = resInternacoes || [];
+
+        // Atualiza indicadores
+        document.getElementById('cardTotalLeitos').textContent = resLeitos.total;
+        document.getElementById('cardLeitosLivres').textContent = resLeitos.livres;
+        document.getElementById('cardLeitosOcupados').textContent = resLeitos.ocupados;
+        document.getElementById('cardLeitosManutencao').textContent = resLeitos.manutencao;
+
+        renderizarMapaLeitos();
+        renderizarTabelaInternacoes();
+      } catch (err) {
+        showToast('Erro ao carregar dados de internação e leitos.', 'danger');
+      }
+    }
+
+    function renderizarMapaLeitos() {
+      const container = document.getElementById('containerSetoresLeitos');
+
+      // Agrupa leitos por setor
+      const setores = {};
+      leitosLista.forEach(l => {
+        if (!setores[l.setor]) setores[l.setor] = [];
+        setores[l.setor].push(l);
+      });
+
+      if (Object.keys(setores).length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">Nenhum leito cadastrado.</p>';
+        return;
+      }
+
+      container.innerHTML = Object.entries(setores).map(([nomeSetor, leitos]) => `
+        <div class="setor-section">
+          <div class="setor-header">
+            <h3>🏢 ${escapeHtml(nomeSetor)}</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">${leitos.length} leito(s)</span>
+          </div>
+          <div class="leitos-grid">
+            ${leitos.map(l => {
+              const statusClass = l.status === 'Livre' ? 'livre' : (l.status === 'Ocupado' ? 'ocupado' : (l.status === 'Em manutenção' ? 'manutencao' : 'reservado'));
+              const badgeClass = l.status === 'Livre' ? 'badge-livre' : (l.status === 'Ocupado' ? 'badge-ocupado' : (l.status === 'Em manutenção' ? 'badge-manutencao' : 'badge-reservado'));
+
+              return `
+                <div class="leito-card ${statusClass}">
+                  <div class="leito-num">
+                    <span>🛏️ ${escapeHtml(l.quarto)}-${escapeHtml(l.numero)}</span>
+                    <span class="badge ${badgeClass}" style="font-size: 10px;">${escapeHtml(l.status)}</span>
+                  </div>
+                  <div class="leito-paciente">
+                    ${l.status === 'Ocupado' ? `
+                      <strong>👤 ${escapeHtml(l.pacienteNome || 'Paciente')}</strong><br>
+                      <small style="color: var(--text-muted);">Desde: ${formatDate(l.dataOcupacao)}</small>
+                    ` : (l.status === 'Em manutenção' ? '<i>Equipamento em revisão técnica</i>' : '<span style="color: var(--success); font-weight:700;">Disponível para internação</span>')}
+                  </div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    ${l.status === 'Ocupado' ? `
+                      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="abrirTransferencia('${l.internacaoId}', '${escapeHtml(l.pacienteNome)}', '${l.id}')">Transferir</button>
+                      <button class="btn btn-primary btn-sm" onclick="encaminharAltaHospitalar('${l.pacienteId}', '${escapeHtml(l.pacienteNome)}', '${l.internacaoId}')">Dar Alta</button>
+                    ` : (l.status === 'Livre' ? `
+                      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="abrirModalNovaInternacao('${l.id}')">Internar Aqui</button>
+                    ` : `
+                      <button class="btn btn-outline btn-sm" style="flex:1;" onclick="alterarStatusLeito('${l.id}', 'Livre')">Liberar Leito</button>
+                    `)}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderizarTabelaInternacoes() {
+      const tbody = document.getElementById('tabelaInternacoesBody');
+
+      if (!internacoesLista || internacoesLista.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+              Nenhum paciente internado no momento.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = internacoesLista.map(i => `
+        <tr>
+          <td><strong>${escapeHtml(i.pacienteNome)}</strong></td>
+          <td><span class="badge badge-ocupado">${escapeHtml(i.quarto)}-${escapeHtml(i.leitoNumero)}</span></td>
+          <td>${escapeHtml(i.setor)}</td>
+          <td>${escapeHtml(i.medicoResponsavel)}</td>
+          <td>${formatDate(i.dataEntrada)}</td>
+          <td>
+            <div>${escapeHtml(i.motivo)}</div>
+            <small style="color: var(--text-muted);">${escapeHtml(i.diagnostico || '')}</small>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: flex; justify-content: flex-end; gap: 6px;">
+              <button class="btn btn-outline btn-sm" onclick="abrirEvolucoes('${i.id}', '${escapeHtml(i.pacienteNome)}')">📝 Evolução</button>
+              <button class="btn btn-outline btn-sm" onclick="abrirTransferencia('${i.id}', '${escapeHtml(i.pacienteNome)}', '${i.leitoId}')">🔄 Transferir</button>
+              <button class="btn btn-primary btn-sm" onclick="encaminharAltaHospitalar('${i.pacienteId}', '${escapeHtml(i.pacienteNome)}', '${i.id}')">📄 Alta</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function alternarAba(aba) {
+      document.getElementById('abaMapaLeitos').style.display = aba === 'mapa' ? 'block' : 'none';
+      document.getElementById('abaTabelaInternacoes').style.display = aba === 'tabela' ? 'block' : 'none';
+      document.getElementById('tabBtnMapa').classList.toggle('active', aba === 'mapa');
+      document.getElementById('tabBtnTabela').classList.toggle('active', aba === 'tabela');
+    }
+
+    async function abrirModalNovaInternacao(leitoPreSelecionadoId = null) {
+      // Popula pacientes elegíveis
+      try {
+        const pacientes = await apiFetch('/api/pacientes');
+        const selPac = document.getElementById('intPacienteBusca');
+        selPac.innerHTML = '<option value="">-- Selecione o Paciente --</option>' +
+          pacientes.map(p => `
+            <option value="${p.id}" data-nome="${escapeHtml(p.nome)}" data-diag="${escapeHtml(p.ultimaConsultaId ? 'Encaminhado da consulta' : '')}">
+              ${escapeHtml(p.nome)} (CPF: ${escapeHtml(p.cpf || '--')} | Status: ${escapeHtml(p.status)})
+            </option>
+          `).join('');
+
+        // Se houver paciente pré-gravado da consulta médica
+        const pre = localStorage.getItem('pacienteInternar');
+        if (pre) {
+          const pacData = JSON.parse(pre);
+          selPac.value = pacData.id;
+          document.getElementById('intMotivo').value = `Encaminhado da consulta médica com diagnóstico: ${pacData.diagnostico || ''}`;
+          document.getElementById('intDiagnostico').value = pacData.diagnostico || '';
+          localStorage.removeItem('pacienteInternar');
+        }
+
+        // Popula leitos livres
+        const selLeito = document.getElementById('intLeito');
+        const livres = leitosLista.filter(l => l.status === 'Livre');
+        if (livres.length === 0) {
+          selLeito.innerHTML = '<option value="">❌ Não há leitos livres disponíveis no momento!</option>';
+        } else {
+          selLeito.innerHTML = '<option value="">-- Selecione o leito livre --</option>' +
+            livres.map(l => `
+              <option value="${l.id}" ${leitoPreSelecionadoId === l.id ? 'selected' : ''}>
+                ${escapeHtml(l.setor)} • Quarto ${escapeHtml(l.quarto)} - Leito ${escapeHtml(l.numero)}
+              </option>
+            `).join('');
+        }
+
+        openModal('modalInternacao');
+      } catch (e) {
+        showToast('Erro ao preparar tela de internação.', 'danger');
+      }
+    }
+
+    function aoSelecionarPacienteInternacao(sel) {
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.dataset.diag) {
+        document.getElementById('intDiagnostico').value = opt.dataset.diag;
+      }
+    }
+
+    async function salvarInternacao(e) {
+      e.preventDefault();
+      const selPac = document.getElementById('intPacienteBusca');
+      const optPac = selPac.options[selPac.selectedIndex];
+      const pacienteId = selPac.value;
+      const pacienteNome = optPac ? optPac.dataset.nome : '';
+
+      const leitoId = document.getElementById('intLeito').value;
+      const motivo = document.getElementById('intMotivo').value.trim();
+
+      if (!pacienteId || !leitoId || !motivo) {
+        showToast('Preencha todos os campos obrigatórios.', 'warning');
+        return;
+      }
+
+      const payload = {
+        pacienteId,
+        pacienteNome,
+        leitoId,
+        motivo,
+        diagnostico: document.getElementById('intDiagnostico').value.trim(),
+        dieta: document.getElementById('intDieta').value,
+        medicoResponsavel: document.getElementById('intMedico').value.trim(),
+        isolamento: document.getElementById('intIsolamento').checked
+      };
+
+      try {
+        await apiFetch('/api/internacoes', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        showToast(`Paciente ${pacienteNome} internado com sucesso!`, 'success');
+        closeModal('modalInternacao');
+        carregarCenso();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function abrirTransferencia(internacaoId, pacienteNome, leitoOrigemId) {
+      document.getElementById('transfInternacaoId').value = internacaoId;
+      document.getElementById('transfInfoPaciente').textContent = `Transferir Paciente: ${pacienteNome}`;
+
+      const sel = document.getElementById('transfNovoLeito');
+      const livres = leitosLista.filter(l => l.status === 'Livre' && String(l.id) !== String(leitoOrigemId));
+
+      if (livres.length === 0) {
+        sel.innerHTML = '<option value="">Nenhum outro leito livre disponível</option>';
+      } else {
+        sel.innerHTML = '<option value="">-- Selecione o novo leito --</option>' +
+          livres.map(l => `<option value="${l.id}">${escapeHtml(l.setor)} - ${escapeHtml(l.quarto)}-${escapeHtml(l.numero)}</option>`).join('');
+      }
+
+      openModal('modalTransferencia');
+    }
+
+    async function salvarTransferencia(e) {
+      e.preventDefault();
+      const internacaoId = document.getElementById('transfInternacaoId').value;
+      const novoLeitoId = document.getElementById('transfNovoLeito').value;
+      const motivo = document.getElementById('transfMotivo').value.trim();
+
+      if (!novoLeitoId) {
+        showToast('Selecione o novo leito.', 'warning');
+        return;
+      }
+
+      try {
+        await apiFetch(`/api/internacoes/${internacaoId}/transferir`, {
+          method: 'POST',
+          body: JSON.stringify({ novoLeitoId, motivo })
+        });
+        showToast('Transferência de leito concluída com sucesso!', 'success');
+        closeModal('modalTransferencia');
+        carregarCenso();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    async function abrirEvolucoes(internacaoId, pacienteNome) {
+      document.getElementById('modalEvolucaoTitulo').textContent = `Evolução Clínica: ${pacienteNome}`;
+      document.getElementById('evolucaoInternacaoId').value = internacaoId;
+
+      const box = document.getElementById('historicoEvolucoes');
+      box.innerHTML = 'Carregando evoluções...';
+
+      try {
+        const res = await apiFetch(`/api/internacoes/${internacaoId}`);
+        const evols = res.internacao?.evolucao || [];
+
+        if (evols.length === 0) {
+          box.innerHTML = '<p style="color:var(--text-muted);">Nenhuma evolução registrada ainda.</p>';
+        } else {
+          box.innerHTML = evols.map(e => `
+            <div style="border-bottom: 1px dashed var(--border); padding: 8px 0;">
+              <strong>${formatDate(e.data)}</strong> - <i>${escapeHtml(e.profissional)}</i><br>
+              ${escapeHtml(e.nota)}
+            </div>
+          `).join('');
+        }
+
+        openModal('modalEvolucao');
+      } catch (e) {
+        showToast('Falha ao carregar evolução.', 'danger');
+      }
+    }
+
+    async function salvarEvolucao(e) {
+      e.preventDefault();
+      const internacaoId = document.getElementById('evolucaoInternacaoId').value;
+      const nota = document.getElementById('txtNovaEvolucao').value.trim();
+
+      if (!nota) return;
+
+      try {
+        await apiFetch(`/api/internacoes/${internacaoId}/evolucao`, {
+          method: 'POST',
+          body: JSON.stringify({ nota })
+        });
+        showToast('Evolução clínica adicionada ao prontuário!', 'success');
+        document.getElementById('txtNovaEvolucao').value = '';
+        closeModal('modalEvolucao');
+        carregarCenso();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    async function alterarStatusLeito(leitoId, novoStatus) {
+      try {
+        await apiFetch(`/api/leitos/${leitoId}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: novoStatus })
+        });
+        showToast(`Status do leito atualizado para '${novoStatus}'.`, 'success');
+        carregarCenso();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function encaminharAltaHospitalar(pacienteId, pacienteNome, internacaoId) {
+      // Guarda dados da internação para preenchimento na tela de alta
+      localStorage.setItem('dadosParaAlta', JSON.stringify({
+        pacienteId,
+        pacienteNome,
+        internacaoId
+      }));
+      location.href = 'alta.html';
+    }
+
+    carregarCenso();
+    setInterval(carregarCenso, 15000);
+  </script>
+</body>
+</html>

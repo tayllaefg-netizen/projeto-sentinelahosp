@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoria & Segurança — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Trilha de Auditoria & Governança de Segurança</h2>
+            <p>Registro imutável de operações clínicas, movimentações de leitos e acessos ao sistema</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" onclick="carregarLogsAuditoria()">🔄 Atualizar Logs</button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Indicadores de Segurança -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pink">🛡️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="cardTotalLogs">0</div>
+              <div class="stat-label">Eventos Auditados</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🔒</div>
+            <div class="stat-info">
+              <div class="stat-value">Ativo</div>
+              <div class="stat-label">Hash PBKDF2 & JWT</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon navy">👥</div>
+            <div class="stat-info">
+              <div class="stat-value">RBAC</div>
+              <div class="stat-label">Controle por Perfil</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">📜</div>
+            <div class="stat-info">
+              <div class="stat-value">LGPD</div>
+              <div class="stat-label">Adequação Acadêmica</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela de Logs de Auditoria -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📋</span>
+              <span>Registro de Eventos do Sistema</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="filtroLog" placeholder="🔍 Filtrar por ação, usuário ou rota..." oninput="filtrarLogs()" style="height: 36px; width: 280px;">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Operação / Ação</th>
+                  <th>Usuário</th>
+                  <th>Perfil</th>
+                  <th>IP Origem</th>
+                  <th>Rota HTTP</th>
+                  <th>Detalhes da Operação</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaAuditoriaBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    Carregando trilha de auditoria...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth(['admin']);
+    initAppLayout('auditoria');
+
+    let logsLista = [];
+
+    async function carregarLogsAuditoria() {
+      try {
+        const res = await apiFetch('/api/auditoria/logs?limit=150');
+        logsLista = res.logs || [];
+        document.getElementById('cardTotalLogs').textContent = logsLista.length;
+        renderizarLogs(logsLista);
+      } catch (err) {
+        showToast('Erro ao carregar logs de auditoria.', 'danger');
+      }
+    }
+
+    function renderizarLogs(logs) {
+      const tbody = document.getElementById('tabelaAuditoriaBody');
+
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum log registrado ainda.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => {
+        let badgeAction = '<span class="badge badge-info">' + escapeHtml(l.action) + '</span>';
+        if (l.action.includes('LOGIN')) badgeAction = '<span class="badge badge-livre">' + escapeHtml(l.action) + '</span>';
+        else if (l.action.includes('ALTA')) badgeAction = '<span class="badge badge-verde">' + escapeHtml(l.action) + '</span>';
+        else if (l.action.includes('INTERNACAO')) badgeAction = '<span class="badge badge-ocupado">' + escapeHtml(l.action) + '</span>';
+        else if (l.action.includes('TRANSFERENCIA')) badgeAction = '<span class="badge badge-laranja">' + escapeHtml(l.action) + '</span>';
+
+        const detalhesStr = typeof l.detalhes === 'object' ? JSON.stringify(l.detalhes) : (l.detalhes || '--');
+
+        return `
+          <tr>
+            <td><code>${formatDate(l.criadoEm)}</code></td>
+            <td>${badgeAction}</td>
+            <td><strong>${escapeHtml(l.usuario)}</strong></td>
+            <td><span class="badge badge-outline" style="font-size: 11px;">${escapeHtml(l.perfil || 'sistema')}</span></td>
+            <td><small><code>${escapeHtml(l.ip)}</code></small></td>
+            <td><small>${escapeHtml(l.metodo || '')} ${escapeHtml(l.rota || '')}</small></td>
+            <td><pre style="margin: 0; font-family: inherit; font-size: 11px; color: var(--text-muted); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(detalhesStr)}">${escapeHtml(detalhesStr)}</pre></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filtrarLogs() {
+      const termo = document.getElementById('filtroLog').value.toLowerCase();
+      const filtrados = logsLista.filter(l =>
+        l.action.toLowerCase().includes(termo) ||
+        l.usuario.toLowerCase().includes(termo) ||
+        (l.rota && l.rota.toLowerCase().includes(termo))
+      );
+      renderizarLogs(filtrados);
+    }
+
+    carregarLogsAuditoria();
+  </script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recepção & Cadastro — Tayla Hospital</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <div id="sidebar-container"></div>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" id="btnToggleSidebar">☰</button>
+          <div class="page-title">
+            <h2>Recepção & Cadastro de Pacientes</h2>
+            <p>Admissão hospitalar, identificação, emissão de senhas e histórico clínico</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="abrirModalNovoPaciente()">
+            <span>➕</span> <span>Novo Paciente</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <!-- Barra de Busca e Filtros -->
+        <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 250px;">
+              <input type="text" id="filtroBusca" placeholder="🔍 Buscar por Nome, CPF ou Senha de Atendimento..." oninput="filtrarPacientes()">
+            </div>
+            <div style="width: 200px;">
+              <select id="filtroStatus" onchange="filtrarPacientes()">
+                <option value="">Todos os Status</option>
+                <option value="triagem">Aguardando Triagem</option>
+                <option value="aguardando_medico">Aguardando Médico</option>
+                <option value="internado">Internado</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+            <button class="btn btn-outline" onclick="carregarPacientes()">Recarregar</button>
+          </div>
+        </div>
+
+        <!-- Tabela de Pacientes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>👥</span>
+              <span>Pacientes Cadastrados & Fila de Entrada</span>
+            </div>
+            <span id="contadorPacientes" class="badge badge-info">0 pacientes</span>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Senha</th>
+                  <th>Paciente</th>
+                  <th>CPF</th>
+                  <th>Nascimento / Idade</th>
+                  <th>Contato</th>
+                  <th>Tipo / Convênio</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaPacientesBody">
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    Carregando pacientes...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR PACIENTE -->
+  <div class="modal-backdrop" id="modalPaciente">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalPacienteTitulo">Cadastrar Paciente</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalPaciente')">&times;</button>
+      </div>
+      <form id="formPaciente" onsubmit="salvarPaciente(event)">
+        <div class="modal-body">
+          <input type="hidden" id="pacienteId">
+
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="pacNome">Nome Completo <span class="required">*</span></label>
+              <input type="text" id="pacNome" placeholder="Ex: Mariana Silva Santos" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pacCpf">CPF <span class="required">*</span></label>
+              <input type="text" id="pacCpf" placeholder="000.000.000-00" maxlength="14" oninput="aplicarMascaraCPF(this)" required>
+              <span id="cpfFeedback" style="font-size: 11px; margin-top: 2px;"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="pacRg">RG / Documento</label>
+              <input type="text" id="pacRg" placeholder="Ex: 12.345.678-9">
+            </div>
+
+            <div class="form-group">
+              <label for="pacNasc">Data de Nascimento</label>
+              <input type="date" id="pacNasc">
+            </div>
+
+            <div class="form-group">
+              <label for="pacSexo">Sexo Biológico</label>
+              <select id="pacSexo">
+                <option value="Feminino">Feminino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Outro">Outro</option>
+                <option value="Não informado">Não informado</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pacTelefone">Telefone / Celular</label>
+              <input type="text" id="pacTelefone" placeholder="(00) 00000-0000">
+            </div>
+
+            <div class="form-group">
+              <label for="pacEmail">E-mail</label>
+              <input type="email" id="pacEmail" placeholder="paciente@email.com">
+            </div>
+
+            <div class="form-group">
+              <label for="pacTipo">Modalidade de Atendimento</label>
+              <select id="pacTipo" onchange="alternarConvenio(this.value)">
+                <option value="Particular">Particular</option>
+                <option value="Convenio">Convênio Médico</option>
+                <option value="SUS">SUS (Sistema Único de Saúde)</option>
+                <option value="Emergência">Emergência / Imediato</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="grupoConvenio" style="display: none;">
+              <label for="pacConvenioNum">Nº Carteirinha / Convênio</label>
+              <input type="text" id="pacConvenioNum" placeholder="Ex: UNIMED 123456">
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="pacEndereco">Endereço Residencial (Rua, Nº, Bairro, Cidade)</label>
+              <input type="text" id="pacEndereco" placeholder="Ex: Av. Paulista, 1500, Apto 42, Bela Vista - São Paulo/SP">
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="pacAlergias">Alergias Prévias Conhecidas</label>
+              <input type="text" id="pacAlergias" placeholder="Ex: Penicilina, Dipirona, Frutos do Mar ou Nenhuma">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalPaciente')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSalvarPaciente">Salvar & Encaminhar para Triagem</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: HISTÓRICO CLÍNICO DO PACIENTE -->
+  <div class="modal-backdrop" id="modalHistorico">
+    <div class="modal-container" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 id="modalHistoricoTitulo">Histórico do Paciente</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalHistorico')">&times;</button>
+      </div>
+      <div class="modal-body" id="modalHistoricoConteudo">
+        Carregando histórico...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalHistorico')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    checkPageAuth();
+    initAppLayout('atendimento');
+
+    let listaPacientes = [];
+
+    function aplicarMascaraCPF(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = v;
+
+      const fb = document.getElementById('cpfFeedback');
+      if (v.replace(/\D/g, '').length === 11) {
+        if (validarCPF(v)) {
+          fb.style.color = 'var(--success)';
+          fb.textContent = '✓ CPF válido';
+        } else {
+          fb.style.color = 'var(--danger)';
+          fb.textContent = '✗ CPF inválido (dígitos verificadores incorretos)';
+        }
+      } else {
+        fb.textContent = '';
+      }
+    }
+
+    function alternarConvenio(tipo) {
+      const g = document.getElementById('grupoConvenio');
+      g.style.display = tipo === 'Convenio' ? 'block' : 'none';
+    }
+
+    async function carregarPacientes() {
+      try {
+        listaPacientes = await apiFetch('/api/pacientes');
+        renderizarPacientes(listaPacientes);
+      } catch (err) {
+        showToast('Erro ao listar pacientes.', 'danger');
+      }
+    }
+
+    function renderizarPacientes(pacientes) {
+      const tbody = document.getElementById('tabelaPacientesBody');
+      document.getElementById('contadorPacientes').textContent = `${pacientes.length} paciente(s)`;
+
+      if (!pacientes || pacientes.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+              Nenhum paciente encontrado. Clique em <b>Novo Paciente</b> para cadastrar.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = pacientes.map(p => {
+        let statusBadge = '<span class="badge badge-info">Aguardando</span>';
+        if (p.status === 'triagem') statusBadge = '<span class="badge badge-warning">Aguardando Triagem</span>';
+        else if (p.status === 'aguardando_medico') statusBadge = '<span class="badge badge-manchester badge-amarelo">Aguardando Médico</span>';
+        else if (p.status === 'internado') statusBadge = '<span class="badge badge-ocupado">Internado</span>';
+        else if (p.status === 'alta') statusBadge = '<span class="badge badge-livre">Alta Concluída</span>';
+
+        return `
+          <tr>
+            <td><strong style="color: var(--primary-dark);">${escapeHtml(p.senhaAtendimento || 'A-00')}</strong></td>
+            <td>
+              <div style="font-weight: 800; color: var(--navy);">${escapeHtml(p.nome)}</div>
+              <small style="color: var(--text-muted);">${escapeHtml(p.alergias || 'Sem alergias')}</small>
+            </td>
+            <td><code>${escapeHtml(p.cpf || '--')}</code></td>
+            <td>${p.dataNascimento ? escapeHtml(p.dataNascimento) : '--'}</td>
+            <td>${escapeHtml(p.telefone || '--')}</td>
+            <td>${escapeHtml(p.tipo || 'Particular')}</td>
+            <td>${statusBadge}</td>
+            <td style="text-align: right;">
+              <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                <button class="btn btn-outline btn-sm" onclick="verHistorico('${p.id}')" title="Ver Prontuário / Histórico">📜</button>
+                <button class="btn btn-outline btn-sm" onclick="editarPaciente('${p.id}')" title="Editar Cadastro">✏️</button>
+                <button class="btn btn-primary btn-sm" onclick="chamarNaTv('${escapeHtml(p.nome)}', '${p.senhaAtendimento}')" title="Chamar na TV">📢 Chamar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filtrarPacientes() {
+      const termo = document.getElementById('filtroBusca').value.toLowerCase();
+      const status = document.getElementById('filtroStatus').value;
+
+      let filtrados = listaPacientes.filter(p => {
+        const matchTermo = (p.nome && p.nome.toLowerCase().includes(termo)) ||
+                           (p.cpf && p.cpf.includes(termo)) ||
+                           (p.senhaAtendimento && p.senhaAtendimento.toLowerCase().includes(termo));
+        const matchStatus = !status || p.status === status;
+        return matchTermo && matchStatus;
+      });
+
+      renderizarPacientes(filtrados);
+    }
+
+    function abrirModalNovoPaciente() {
+      document.getElementById('modalPacienteTitulo').textContent = 'Cadastrar Novo Paciente';
+      document.getElementById('pacienteId').value = '';
+      document.getElementById('formPaciente').reset();
+      document.getElementById('cpfFeedback').textContent = '';
+      alternarConvenio('Particular');
+      openModal('modalPaciente');
+    }
+
+    function editarPaciente(id) {
+      const p = listaPacientes.find(x => String(x.id) === String(id));
+      if (!p) return;
+
+      document.getElementById('modalPacienteTitulo').textContent = `Editar Paciente: ${p.nome}`;
+      document.getElementById('pacienteId').value = p.id;
+      document.getElementById('pacNome').value = p.nome || '';
+      document.getElementById('pacCpf').value = p.cpf || '';
+      document.getElementById('pacRg').value = p.rg || '';
+      document.getElementById('pacNasc').value = p.dataNascimento || '';
+      document.getElementById('pacSexo').value = p.sexo || 'Feminino';
+      document.getElementById('pacTelefone').value = p.telefone || '';
+      document.getElementById('pacEmail').value = p.email || '';
+      document.getElementById('pacTipo').value = p.tipo || 'Particular';
+      document.getElementById('pacConvenioNum').value = p.convenioNumero || '';
+      document.getElementById('pacEndereco').value = typeof p.endereco === 'string' ? p.endereco : (p.endereco?.rua || '');
+      document.getElementById('pacAlergias').value = p.alergias || '';
+
+      alternarConvenio(p.tipo);
+      openModal('modalPaciente');
+    }
+
+    async function salvarPaciente(e) {
+      e.preventDefault();
+      const id = document.getElementById('pacienteId').value;
+      const cpf = document.getElementById('pacCpf').value.trim();
+
+      if (!validarCPF(cpf)) {
+        showToast('CPF inválido. Verifique o número digitado.', 'danger');
+        return;
+      }
+
+      const payload = {
+        nome: document.getElementById('pacNome').value.trim(),
+        cpf: cpf,
+        rg: document.getElementById('pacRg').value.trim(),
+        dataNascimento: document.getElementById('pacNasc').value,
+        sexo: document.getElementById('pacSexo').value,
+        telefone: document.getElementById('pacTelefone').value.trim(),
+        email: document.getElementById('pacEmail').value.trim(),
+        tipo: document.getElementById('pacTipo').value,
+        convenioNumero: document.getElementById('pacConvenioNum').value.trim(),
+        endereco: document.getElementById('pacEndereco').value.trim(),
+        alergias: document.getElementById('pacAlergias').value.trim()
+      };
+
+      try {
+        if (id) {
+          await apiFetch(`/api/pacientes/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          showToast('Paciente atualizado com sucesso!', 'success');
+        } else {
+          const res = await apiFetch('/api/pacientes', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          showToast(`Paciente cadastrado! Senha emitida: ${res.senhaAtendimento}`, 'success');
+        }
+
+        closeModal('modalPaciente');
+        carregarPacientes();
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    async function verHistorico(id) {
+      openModal('modalHistorico');
+      const box = document.getElementById('modalHistoricoConteudo');
+      box.innerHTML = '<p style="text-align:center;">Carregando histórico clínico...</p>';
+
+      try {
+        const data = await apiFetch(`/api/pacientes/${id}/historico`);
+        const p = data.paciente;
+        const h = data.historico;
+
+        document.getElementById('modalHistoricoTitulo').textContent = `Prontuário: ${p.nome}`;
+
+        box.innerHTML = `
+          <div style="background: #F8FAFC; padding: 14px; border-radius: 8px; margin-bottom: 16px;">
+            <p><strong>CPF:</strong> ${escapeHtml(p.cpf)} | <strong>Tipo:</strong> ${escapeHtml(p.tipo)} | <strong>Status:</strong> ${escapeHtml(p.status)}</p>
+            <p style="color: var(--danger); margin-top: 4px;"><strong>Alergias:</strong> ${escapeHtml(p.alergias || 'Nenhuma')}</p>
+          </div>
+
+          <h4 style="color: var(--navy); margin-bottom: 8px;">🩺 Triagens Realizadas (${h.triagens.length})</h4>
+          ${h.triagens.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">Nenhuma triagem registrada.</p>' : h.triagens.map(t => `
+            <div style="border-left: 3px solid var(--primary); padding-left: 10px; margin-bottom: 10px; font-size: 13px;">
+              <strong>${formatDate(t.createdAt)}</strong> - Classificação: <span class="badge badge-${t.risco}">${t.risco.toUpperCase()}</span><br>
+              PA: ${t.pressaoArterial} | Temp: ${t.temperatura}°C | SpO2: ${t.saturacaoO2}% | Queixa: ${escapeHtml(t.queixaPrincipal || t.sintoma)}
+            </div>
+          `).join('')}
+
+          <h4 style="color: var(--navy); margin: 16px 0 8px;">👨‍⚕️ Consultas Médicas (${h.consultas.length})</h4>
+          ${h.consultas.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">Nenhuma consulta registrada.</p>' : h.consultas.map(c => `
+            <div style="border-left: 3px solid var(--navy); padding-left: 10px; margin-bottom: 10px; font-size: 13px;">
+              <strong>${formatDate(c.createdAt)}</strong> - ${escapeHtml(c.medicoNome)}<br>
+              <b>Diagnóstico:</b> ${escapeHtml(c.diagnostico || 'Não informado')} | <b>Conduta:</b> ${escapeHtml(c.conduta || '--')}<br>
+              <b>Medicação:</b> ${escapeHtml(c.medicacao || 'Nenhuma')}
+            </div>
+          `).join('')}
+
+          <h4 style="color: var(--navy); margin: 16px 0 8px;">🛏️ Internações Hospitalares (${h.internacoes.length})</h4>
+          ${h.internacoes.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">Nenhuma internação registrada.</p>' : h.internacoes.map(i => `
+            <div style="border-left: 3px solid var(--info); padding-left: 10px; margin-bottom: 10px; font-size: 13px;">
+              <strong>Leito ${escapeHtml(i.quarto)}-${escapeHtml(i.leitoNumero)} (${escapeHtml(i.setor)})</strong> - Status: ${escapeHtml(i.status)}<br>
+              Motivo: ${escapeHtml(i.motivo)} | Entrada: ${formatDate(i.dataEntrada)}
+            </div>
+          `).join('')}
+        `;
+      } catch (err) {
+        box.innerHTML = `<p style="color: var(--danger);">Falha ao carregar prontuário: ${escapeHtml(err.message)}</p>`;
+      }
+    }
+
+    async function chamarNaTv(nome, senha) {
+      try {
+        await apiFetch('/api/tv/chamar', {
+          method: 'POST',
+          body: JSON.stringify({
+            localTipo: 'RECEPÇÃO / GUICHÊ',
+            localNumero: '01',
+            paciente: nome,
+            senha: senha || 'A-01'
+          })
+        });
+        showToast(`Paciente ${nome} chamado no painel de TV!`, 'success');
+        playHospitalChime();
+      } catch (err) {
+        showToast('Erro ao transmitir chamada para a TV.', 'danger');
+      }
+    }
+
+    carregarPacientes();
+  </script>
+</body>
+</html>
